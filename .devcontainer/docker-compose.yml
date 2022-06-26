@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  biblion:
+    build: .
+    volumes: [..:/biblion:cached]
+    command: sleep infinity
+    user: vscode
+
+  mongo:
+    image: mongo:5
+    restart: unless-stopped
+    volumes: [mongodb-data:/data/db]
+
+volumes:
+  mongodb-data:
