@@ -11,6 +11,10 @@ services:
     image: mongo:5
     restart: unless-stopped
     volumes: [mongodb-data:/data/db]
+    ports: [27017:27017]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
 
 volumes:
   mongodb-data:
