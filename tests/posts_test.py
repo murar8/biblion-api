@@ -1,3 +1,4 @@
+from datetime import datetime
 from http import HTTPStatus
 import os
 import pytest
@@ -15,6 +16,8 @@ async def test_get_post(app_client: AsyncClient):
     assert json["content"] == "console.log('Hello, world!')"
     assert json["name"] == "test0.js"
     assert json["language"] == "js"
+    assert datetime.fromisoformat(json["createdAt"])
+    assert datetime.fromisoformat(json["updatedAt"])
 
 
 @pytest.mark.asyncio
@@ -32,10 +35,13 @@ async def test_create_post(app_client: AsyncClient):
     assert len(json["id"]) > 0
     assert json["ownerId"] == os.environ.get("TEST_USER")
     assert json["content"] == "Test"
+    assert datetime.fromisoformat(json["createdAt"])
+    assert datetime.fromisoformat(json["updatedAt"])
 
 
 @pytest.mark.asyncio
 async def test_update_post(app_client: AsyncClient):
+    now = datetime.utcnow()
     data = {"content": "console.log('Update!')"}
     response = await app_client.patch("posts/test0", json=data)
     json = response.json()
@@ -46,6 +52,8 @@ async def test_update_post(app_client: AsyncClient):
     assert json["content"] == data["content"]
     assert json["name"] == "test0.js"
     assert json["language"] == "js"
+    assert datetime.fromisoformat(json["createdAt"])
+    assert datetime.fromisoformat(json["updatedAt"]) >= now
 
 
 @pytest.mark.asyncio

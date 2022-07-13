@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import os
 
 import pytest_asyncio
@@ -30,6 +31,8 @@ async def app_db():
             "content": "console.log('Hello, world!')",
             "name": "test0.js",
             "language": "js",
+            "createdAt": datetime(2002, 10, 27, 6, 0, 0),
+            "updatedAt": datetime(2002, 10, 28, 18, 0, 0),
         },
         {
             "_id": "test1",
@@ -37,6 +40,8 @@ async def app_db():
             "content": "Hello, world!",
             "name": "test1.txt",
             "language": "txt",
+            "createdAt": datetime(2002, 10, 27, 6, 0, 0),
+            "updatedAt": datetime(2002, 10, 28, 18, 0, 0),
         },
         {
             "_id": "test2",
@@ -44,6 +49,8 @@ async def app_db():
             "content": "console.log('Hello, world!')",
             "name": "test2.js",
             "language": "js",
+            "createdAt": datetime(2002, 10, 27, 6, 0, 0),
+            "updatedAt": datetime(2002, 10, 28, 18, 0, 0),
         },
         {
             "_id": "test3",
@@ -51,6 +58,8 @@ async def app_db():
             "content": "Hello, world!",
             "name": "test3.txt",
             "language": "txt",
+            "createdAt": datetime(2002, 10, 27, 6, 0, 0),
+            "updatedAt": datetime(2002, 10, 28, 18, 0, 0),
         },
     ]
 

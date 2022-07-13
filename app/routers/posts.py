@@ -1,7 +1,9 @@
+from datetime import datetime
 from http import HTTPStatus
 
-from motor.core import Database
+from motor.core import AgnosticDatabase
 from fastapi import APIRouter, Depends, HTTPException
+
 
 from ..request import CreatePostRequest, UpdatePostRequest
 from ..response import PostResponse
@@ -14,7 +16,7 @@ router = APIRouter()
 
 
 @router.get("/{id}", response_model=PostResponse)
-async def get_post(id: str, db: Database = Depends(get_db)):
+async def get_post(id: str, db: AgnosticDatabase = Depends(get_db)):
     if post := await db.posts.find_one({"_id": id}):
         return PostResponse.from_mongo(post)
     else:
@@ -25,7 +27,7 @@ async def get_post(id: str, db: Database = Depends(get_db)):
 async def create_post(
     body: CreatePostRequest,
     jwt: AccessToken = Depends(get_jwt),
-    db: Database = Depends(get_db),
+    db: AgnosticDatabase = Depends(get_db),
 ):
     while True:
         id = generate_shortid()
@@ -33,7 +35,14 @@ async def create_post(
         if await db.posts.find_one({"_id": id}):
             continue
 
-        document = {**body.dict(), "ownerId": jwt.sub, "_id": id}
+        createdAt = datetime.utcnow()
+        document = {
+            "_id": id,
+            "ownerId": jwt.sub,
+            "createdAt": createdAt,
+            "updatedAt": createdAt,
+            **body.dict(),
+        }
         await db.posts.insert_one(document=document)
 
         post = await db.posts.find_one({"_id": id})
@@ -45,10 +54,10 @@ async def update_post(
     id: str,
     body: UpdatePostRequest,
     jwt: AccessToken = Depends(get_jwt),
-    db: Database = Depends(get_db),
+    db: AgnosticDatabase = Depends(get_db),
 ):
     where = {"_id": id, "ownerId": jwt.sub}
-    update = {"$set": body.dict(exclude_unset=True)}
+    update = {"$set": {**body.dict(exclude_unset=True), "updatedAt": datetime.utcnow()}}
     result = await db.posts.update_one(where, update)
     post = await db.posts.find_one({"_id": id})
 
