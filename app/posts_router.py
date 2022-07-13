@@ -5,12 +5,12 @@ from motor.core import AgnosticDatabase
 from fastapi import APIRouter, Depends, HTTPException
 
 
-from ..request import CreatePostRequest, UpdatePostRequest
-from ..response import PostResponse
-from ..shortid import generate_shortid
-from ..access_token import AccessToken
-from ..providers.auth import get_jwt
-from ..providers.database import get_db
+from .request import CreatePostRequest, UpdatePostRequest
+from .response import PostResponse
+from .shortid import generate_shortid
+from .access_token import AccessToken
+from .providers.auth import get_jwt
+from .providers.database import get_db
 
 router = APIRouter()
 
