@@ -1,11 +1,13 @@
-version: "3.8"
+version: "3.9"
 
 services:
-  biblion:
-    build: .
-    volumes: [..:/biblion:cached]
-    command: sleep infinity
-    user: vscode
+  app:
+    build: { context: ., dockerfile: Dockerfile.dev }
+    env_file: .env.development
+    volumes: [./:/app:cached]
+    ports: [8000:8000]
+    depends_on: [mongo]
+    command: uvicorn app:app --reload --host 0.0.0.0
 
   mongo:
     image: mongo:5

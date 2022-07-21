@@ -1,9 +1,0 @@
-{
-  "name": "Biblion",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "biblion",
-  "workspaceFolder": "/biblion",
-  "extensions": ["ms-python.python", "ms-python.vscode-pylance"],
-  "forwardPorts": [8000],
-  "otherPortsAttributes": { "onAutoForward": "ignore" }
-}

@@ -1,0 +1,10 @@
+{
+  "name": "Biblion",
+  "image": "mcr.microsoft.com/vscode/devcontainers/python:3",
+  "runArgs": ["--init"],
+  "features": { "docker-in-docker": { "version": "latest" } },
+  "extensions": ["ms-python.python", "ms-python.vscode-pylance"],
+  "forwardPorts": [8000],
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
+  "remoteUser": "vscode"
+}
