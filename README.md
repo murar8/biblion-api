@@ -6,11 +6,19 @@ This project contains the backend functionality for the biblion project, a simpl
 
 - Full integration test suite
 - Docker ready development environment
+- Automated deployment to the container registry using GitHub Actions
 
 ## Local development
 
 - Start a development server: `docker compose -f docker-compose.dev.yml run --service-ports app`
 - Run the integration test suite: `docker compose -f docker-compose.test.yml run test`
+
+## Deploying to production
+
+Deployment is handled automatically using a CI pipeline every time the code is pushed.
+
+- When the code is pushed to the `main` branch an image with the `edge` tag is deployed.
+- When a semantic version git tag is pushed (e.g. `v1.2.3`) an image with the corresponding version tags is deployed (e.g. `v1` and `1.2.3`). Please make sure to honor the SemVer specification when performing a version bump (refer to [https://semver.org/]()).
 
 ## License
 
