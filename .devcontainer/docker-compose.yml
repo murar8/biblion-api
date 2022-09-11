@@ -1,13 +1,11 @@
-version: "3.9"
-
 services:
   app:
-    build: { context: ., dockerfile: Dockerfile.dev }
-    env_file: .env.development
-    volumes: [./:/app:cached]
-    ports: [8000:8000]
+    image: mcr.microsoft.com/vscode/devcontainers/python:3
+    volumes: [../:/app:cached]
+    network_mode: service:mongo
     depends_on: [mongo]
-    command: uvicorn app:app --reload --host 0.0.0.0
+    init: true
+    command: sleep infinity
 
   mongo:
     image: mongo:5

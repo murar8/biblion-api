@@ -1,0 +1,10 @@
+{
+  "name": "Biblion",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/app",
+  "remoteUser": "vscode",
+  "extensions": ["ms-python.python", "ms-python.vscode-pylance"],
+  "forwardPorts": [8000, 27017],
+  "otherPortsAttributes": { "onAutoForward": "ignore" }
+}

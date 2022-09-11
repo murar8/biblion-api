@@ -5,13 +5,12 @@ This project contains the backend functionality for the biblion project, a simpl
 ## Features
 
 - Full integration test suite
-- Docker ready development environment
-- Automated deployment to the container registry using GitHub Actions
+- Automated deployment as a Docker container to the GitHub registry using GitHub Actions
 
 ## Local development
 
-- Start a development server: `docker compose -f docker-compose.dev.yml run --service-ports app`
-- Run the integration test suite: `docker compose -f docker-compose.test.yml run test`
+- Start a development server: `pipenv run serve`
+- Run the integration test suite: `pipenv run test`
 
 ## Deploying to production
 

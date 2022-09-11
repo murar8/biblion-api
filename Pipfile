@@ -12,7 +12,13 @@ motor = "*"
 black = "*"
 pytest = "*"
 pytest-asyncio = "*"
+pytest-dotenv = "*"
 httpx = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 
 [requires]
 python_version = "3.10"
+
+[scripts]
+serve = "uvicorn app:app --reload --env-file .env.development"
+test = "pytest ."
