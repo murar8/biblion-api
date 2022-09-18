@@ -1,17 +1,16 @@
 from datetime import datetime
 from http import HTTPStatus
 
-from motor.core import AgnosticDatabase
-from fastapi import APIRouter, Depends, HTTPException
 import pymongo
+from fastapi import APIRouter, Depends, HTTPException
+from motor.core import AgnosticDatabase
 
-
-from .request import CreatePostRequest, GetPostsParams, UpdatePostRequest
-from .response import PaginatedResponse, PostResponse
-from .shortid import generate_shortid
-from .access_token import AccessToken
-from .providers.auth import get_jwt
-from .providers.database import get_db
+from app.access_token import AccessToken
+from app.providers.auth import get_jwt
+from app.providers.database import get_db
+from app.request import CreatePostRequest, GetPostsParams, UpdatePostRequest
+from app.response import PaginatedResponse, PostResponse
+from app.shortid import generate_shortid
 
 router = APIRouter()
 

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from typing import Optional
-from pydantic import BaseModel
-import jwt
 
-from .config import JwtConfig
+import jwt
+from pydantic import BaseModel
+
+from app.config import JwtConfig
 
 
 class AccessToken(BaseModel):

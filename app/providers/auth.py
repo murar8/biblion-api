@@ -1,10 +1,9 @@
 from http import HTTPStatus
 
+from app.access_token import AccessToken
+from app.providers.config import Config, get_config
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
-from ..access_token import AccessToken
-from ..providers.config import Config, get_config
 
 _get_credentials = HTTPBearer()
 

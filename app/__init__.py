@@ -1,10 +1,11 @@
-from http import HTTPStatus
 import os
+from http import HTTPStatus
 
 from fastapi import FastAPI
-from pydantic import ValidationError
 from fastapi.responses import JSONResponse
-from .posts_router import router as posts_router
+from pydantic import ValidationError
+
+from app.posts_router import router as posts_router
 
 version = os.environ.get("VERSION", default="development")
 app = FastAPI(title="Biblion", version=version)
