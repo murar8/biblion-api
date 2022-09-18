@@ -1,20 +1,24 @@
-FROM python:3-slim
+FROM python:3-alpine
 
 ARG PORT
-ENV PORT=${PORT:-80}
+ENV PORT=${PORT}
 
 ARG VERSION
 ENV VERSION=${VERSION}
 
-RUN pip install pipenv uvicorn
+RUN adduser -S python
+
+RUN pip install --no-cache --upgrade pip && pip install --no-cache pipenv uvicorn
 
 WORKDIR /app
 
 COPY ./Pipfile ./Pipfile.lock /app/
 
-RUN pipenv install --deploy --ignore-pipfile --system
+RUN pipenv install --deploy --ignore-pipfile --system --clear
 
 COPY ./app /app/app/
+
+USER python
 
 EXPOSE ${PORT}
 
