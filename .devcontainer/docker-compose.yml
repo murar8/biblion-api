@@ -1,8 +1,8 @@
 services:
-  app:
+  biblion:
     image: mcr.microsoft.com/vscode/devcontainers/python:3
     volumes: [../:/app:cached]
-    network_mode: service:mongo
+    ports: [8000:8000]
     depends_on: [mongo]
     init: true
     command: sleep infinity
@@ -18,3 +18,6 @@ services:
 
 volumes:
   mongodb-data:
+
+networks:
+  default: { name: "biblion-network" }

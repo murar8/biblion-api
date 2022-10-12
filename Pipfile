@@ -20,5 +20,5 @@ uvicorn = {extras = ["standard"], version = "*"}
 python_version = "3.10"
 
 [scripts]
-serve = "uvicorn app:app --reload --env-file .env.development"
+serve = "uvicorn app:app --reload --host 0.0.0.0 --env-file .env.development"
 test = "pytest ."

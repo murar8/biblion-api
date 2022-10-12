@@ -1,7 +1,7 @@
 {
   "name": "Biblion",
   "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
+  "service": "biblion",
   "workspaceFolder": "/app",
   "remoteUser": "vscode",
   "extensions": ["ms-python.python", "ms-python.vscode-pylance"],
