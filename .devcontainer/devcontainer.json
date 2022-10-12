@@ -6,5 +6,16 @@
   "remoteUser": "vscode",
   "extensions": ["ms-python.python", "ms-python.vscode-pylance"],
   "forwardPorts": [8000, 27017],
-  "otherPortsAttributes": { "onAutoForward": "ignore" }
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
+  "postCreateCommand": "pipenv install --dev",
+
+  "containerEnv": {
+    "PIPENV_VENV_IN_PROJECT": "true"
+  },
+
+  "settings": {
+    "python.formatting.provider": "black",
+    "python.venvPath": ".venv",
+    "python.linting.pylintEnabled": false
+  }
 }
