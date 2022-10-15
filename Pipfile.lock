@@ -168,11 +168,11 @@
                 "all"
             ],
             "hashes": [
-                "sha256:1803d962f169dc9f8dde54a64b22eb16f6d81573f54401971f90f0a67234a8b4",
-                "sha256:bb219cfafd0d2ccf8f32310c9a257a06b0210bd8e2a03706a6f5a9f9f1416878"
+                "sha256:1facd097189682a4ff11cbd01334a992e51b56be663b2bd50c2c09523624f144",
+                "sha256:de3166b6b1163dc22da4dc4ebdc3192fcbac7700dd1870a1afa44de636a636b5"
             ],
             "index": "pypi",
-            "version": "==0.85.0"
+            "version": "==0.85.1"
         },
         "h11": {
             "hashes": [
@@ -575,10 +575,10 @@
         },
         "types-cryptography": {
             "hashes": [
-                "sha256:913b3e66a502edbf4bfc3bb45e33ab476040c56942164a7ff37bd1f0ef8ef783",
-                "sha256:b85c45fd4d3d92e8b18e9a5ee2da84517e8fff658e3ef5755c885b1c2a27c1fe"
+                "sha256:b9f8aa93d9e4d7ff920961cdce3dc7cca479946890924d68356b66f15f4f35e3",
+                "sha256:f108e7a7161eedd9fe391e1a8ae5a98d40c1da2f0418bc0812a9119990272314"
             ],
-            "version": "==3.3.23"
+            "version": "==3.3.23.1"
         },
         "typing-extensions": {
             "hashes": [
