@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
@@ -14,6 +14,14 @@ class PaginatedResponse(GenericModel, Generic[T]):
         default=None,
         description="Continuation token to define the starting offset of the query.",
     )
+
+    @classmethod
+    def __concrete_name__(cls: type[Any], params: tuple[type[Any], ...]) -> str:
+        """
+        Make the concrete class name look nicer.
+        See https://pydantic-docs.helpmanual.io/usage/models/#generic-models
+        """
+        return f"Paginated{params[0].__name__}"
 
 
 class PostResponse(BaseModel):

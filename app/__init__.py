@@ -7,10 +7,16 @@ from pydantic import ValidationError
 
 from app.posts_router import router as posts_router
 
-version = os.environ.get("VERSION", default="development")
-app = FastAPI(title="Biblion", version=version)
+app = FastAPI(
+    title="Biblion",
+    version=os.environ.get("VERSION", default="development"),
+    # We need to make sure each route handler has a unique name across the
+    # whole project since we only use the route name to generate a unique id.
+    # Also see https://fastapi.tiangolo.com/advanced/generate-clients
+    generate_unique_id_function=lambda route: route.name,
+)
 
-app.include_router(posts_router, prefix="/posts")
+app.include_router(posts_router, prefix="/posts", tags=["posts"])
 
 # Respond with the correct format for pydantic validator errors.
 # See https://github.com/tiangolo/fastapi/issues/1474
