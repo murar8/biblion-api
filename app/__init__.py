@@ -2,6 +2,7 @@ import os
 from http import HTTPStatus
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
@@ -14,6 +15,14 @@ app = FastAPI(
     # whole project since we only use the route name to generate a unique id.
     # Also see https://fastapi.tiangolo.com/advanced/generate-clients
     generate_unique_id_function=lambda route: route.name,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # TODO: add production origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(posts_router, prefix="/posts", tags=["posts"])
