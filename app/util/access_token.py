@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+from typing_extensions import Self
 
 import jwt
 from pydantic import BaseModel
@@ -18,18 +19,11 @@ class AccessToken(BaseModel):
     gty: str
 
     @staticmethod
-    def try_from_str(encoded: str, config: JwtConfig) -> Optional[AccessToken]:
+    def try_from_str(encoded: str, config: JwtConfig) -> Optional[Self]:
         try:
-            if config.jwks_endpoint:
-                jwks_client = jwt.PyJWKClient(config.jwks_endpoint)
-                jwk = jwks_client.get_signing_key_from_jwt(encoded)
-                key = jwk.key
-            else:
-                key = config.key
-
             payload = jwt.decode(
                 jwt=encoded,
-                key=key,
+                key=config.key,
                 algorithms=config.algorithm,
                 audience=config.audience,
                 issuer=config.issuer,
