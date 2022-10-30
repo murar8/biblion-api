@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from app.access_token import AccessToken
+from app.util.access_token import AccessToken
 from app.providers.config import Config, get_config
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer

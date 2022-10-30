@@ -5,7 +5,7 @@ from typing import Optional
 import jwt
 from pydantic import BaseModel
 
-from app.config import JwtConfig
+from app.util.config import JwtConfig
 
 
 class AccessToken(BaseModel):

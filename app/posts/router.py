@@ -5,12 +5,12 @@ import pymongo
 from fastapi import APIRouter, Depends, HTTPException
 from motor.core import AgnosticDatabase
 
-from app.access_token import AccessToken
+from app.util.access_token import AccessToken
 from app.providers.auth import get_jwt
 from app.providers.database import get_db
-from app.request import CreatePostRequest, GetPostsParams, UpdatePostRequest
-from app.response import PaginatedResponse, PostResponse
-from app.shortid import generate_shortid
+from app.posts.request import CreatePostRequest, GetPostsParams, UpdatePostRequest
+from app.posts.response import PaginatedResponse, PostResponse
+from app.util.shortid import generate_shortid
 
 router = APIRouter()
 

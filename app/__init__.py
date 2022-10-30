@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
-from app.posts_router import router as posts_router
+from app.posts.router import router as posts_router
 
 app = FastAPI(
     title="Biblion",

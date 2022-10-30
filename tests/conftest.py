@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app import app
-from app.config import Config
+from app.util.config import Config
 
 # Redefine the event_loop fixture to have a session scope.
 # See https://github.com/pytest-dev/pytest-asyncio/issues/68#issuecomment-334083751
