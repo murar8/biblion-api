@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
 from app.posts.router import router as posts_router
+from app.users.router import router as users_router
 
 app = FastAPI(
     title="Biblion",
@@ -26,6 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(posts_router, prefix="/posts", tags=["posts"])
+app.include_router(users_router, prefix="/users", tags=["users"])
 
 # Respond with the correct format for pydantic validator errors.
 # See https://github.com/tiangolo/fastapi/issues/1474

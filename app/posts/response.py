@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from typing import Any, Generic, Optional, TypeVar
 
 from pydantic import BaseModel, Field
@@ -26,7 +27,7 @@ class PaginatedResponse(GenericModel, Generic[T]):
 
 class PostResponse(BaseModel):
     id: str
-    ownerId: Optional[str]
+    ownerId: Optional[uuid.UUID]
     name: Optional[str]
     language: Optional[str]
     content: str

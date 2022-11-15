@@ -2,7 +2,6 @@ services:
   biblion:
     image: mcr.microsoft.com/vscode/devcontainers/python:3
     volumes: [../:/app:cached]
-    ports: [8000:8000]
     depends_on: [mongo]
     init: true
     command: sleep infinity
@@ -15,6 +14,12 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
 
 volumes:
   mongodb-data:

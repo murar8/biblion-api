@@ -1,18 +1,19 @@
-from pydantic import BaseSettings
+from pydantic import AnyUrl, BaseSettings, conint
 
 
 class JwtConfig(BaseSettings):
-    audience: str
     algorithm: str
+    secret: str
+    audience: str
     issuer: str
-    key: str
+    expiration: conint(gt=0)
 
     class Config:
         env_prefix = "JWT_"
 
 
 class DatabaseConfig(BaseSettings):
-    url: str
+    url: AnyUrl
     name: str
 
     class Config:

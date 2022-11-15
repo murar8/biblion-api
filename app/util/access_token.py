@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import Optional
-from typing_extensions import Self
+import time
 
 import jwt
 from pydantic import BaseModel
+from typing_extensions import Self
 
 from app.util.config import JwtConfig
 
@@ -15,20 +15,32 @@ class AccessToken(BaseModel):
     aud: str
     iat: int
     exp: int
-    azp: str
-    gty: str
 
     @staticmethod
-    def try_from_str(encoded: str, config: JwtConfig) -> Optional[Self]:
-        try:
-            payload = jwt.decode(
-                jwt=encoded,
-                key=config.key,
-                algorithms=config.algorithm,
-                audience=config.audience,
-                issuer=config.issuer,
-            )
+    def encode(sub: str, config: JwtConfig) -> str:
+        iat = time.time()
+        exp = iat + config.expiration
 
-            return AccessToken(**payload)
-        except (jwt.DecodeError, jwt.ExpiredSignatureError):
-            return None
+        return jwt.encode(
+            key=config.secret,
+            algorithm=config.algorithm,
+            payload={
+                "iss": config.issuer,
+                "sub": sub,
+                "aud": config.audience,
+                "iat": iat,
+                "exp": exp,
+            },
+        )
+
+    @staticmethod
+    def decode(encoded: str, config: JwtConfig) -> Self:
+        payload = jwt.decode(
+            jwt=encoded,
+            key=config.secret,
+            algorithms=config.algorithm,
+            audience=config.audience,
+            issuer=config.issuer,
+        )
+
+        return AccessToken(**payload)
