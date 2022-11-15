@@ -4,7 +4,7 @@ from http import HTTPStatus
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
-from motor.core import AgnosticDatabase
+from pymongo.database import Database
 
 from app.providers.auth import get_jwt
 from app.providers.config import get_config
@@ -18,7 +18,7 @@ router = APIRouter()
 
 
 @router.get("/{id}", response_model=UserResponse)
-async def get_user(id: str, db: AgnosticDatabase = Depends(get_db)):
+async def get_user(id: str, db: Database = Depends(get_db)):
     if user := await db.users.find_one({"_id": uuid.UUID(id)}):
         return UserResponse.from_mongo(user)
     else:
@@ -28,7 +28,7 @@ async def get_user(id: str, db: AgnosticDatabase = Depends(get_db)):
 @router.post("/", response_model=UserResponse, status_code=HTTPStatus.CREATED)
 async def create_user(
     body: CreateUserRequest,
-    db: AgnosticDatabase = Depends(get_db),
+    db: Database = Depends(get_db),
 ):
     if await db.users.find_one({"$or": [{"email": body.email}, {"name": body.name}]}):
         raise HTTPException(status_code=HTTPStatus.CONFLICT)
@@ -58,7 +58,7 @@ async def update_user(
     id: str,
     body: UpdateUserRequest,
     jwt: AccessToken = Depends(get_jwt),
-    db: AgnosticDatabase = Depends(get_db),
+    db: Database = Depends(get_db),
 ):
     if id != jwt.sub:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
@@ -88,7 +88,7 @@ async def update_user(
 async def login_user(
     body: LoginUserRequest,
     response: Response,
-    db: AgnosticDatabase = Depends(get_db),
+    db: Database = Depends(get_db),
     config: Config = Depends(get_config),
 ):
     user = await db.users.find_one(

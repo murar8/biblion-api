@@ -1,6 +1,6 @@
 from fastapi import Depends
-from motor.core import Database
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo.database import Database
 
 from app.providers.config import Config, get_config
 
