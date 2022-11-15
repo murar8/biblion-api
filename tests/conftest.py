@@ -93,22 +93,23 @@ async def app_db():
 
 
 @pytest_asyncio.fixture()
-async def app_client():
+async def app_client(request):
     client = AsyncClient(
         app=app,
         base_url="https://biblion.com",
         follow_redirects=True,
     )
 
-    # JWT details
-    # sub: f4c8e142-5a8e-4759-9eec-74d9139dcfd5
-    # iat: 1667766384.0424864
-    # exp: 2667766384.0424864
+    if request.param["authorized"]:
+        # JWT details
+        # sub: f4c8e142-5a8e-4759-9eec-74d9139dcfd5
+        # iat: 1667766384.0424864
+        # exp: 2667766384.0424864
 
-    client.cookies.set(
-        "access_token",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FwaS5iaWJsaW9uLmNvbSIsInN1YiI6ImY0YzhlMTQyLTVhOGUtNDc1OS05ZWVjLTc0ZDkxMzlkY2ZkNSIsImF1ZCI6Imh0dHBzOi8vYXBpLmJpYmxpb24uY29tIiwiaWF0IjoxNjY3NzY2Mzg0LjA0MjQ4NjQsImV4cCI6MjY2Nzc2NjM4NC4wNDI0ODZ9.Dnk6k40e56or2u79rPJelZnYwJHY5QoLwN94kkFMcP0",
-    )
+        client.cookies.set(
+            "access_token",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FwaS5iaWJsaW9uLmNvbSIsInN1YiI6ImY0YzhlMTQyLTVhOGUtNDc1OS05ZWVjLTc0ZDkxMzlkY2ZkNSIsImF1ZCI6Imh0dHBzOi8vYXBpLmJpYmxpb24uY29tIiwiaWF0IjoxNjY3NzY2Mzg0LjA0MjQ4NjQsImV4cCI6MjY2Nzc2NjM4NC4wNDI0ODZ9.Dnk6k40e56or2u79rPJelZnYwJHY5QoLwN94kkFMcP0",
+        )
 
     yield client
 
