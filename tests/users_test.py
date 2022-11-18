@@ -33,7 +33,7 @@ async def test_create_user(app_client: AsyncClient):
     assert len(json["id"]) > 0
     assert json["email"] == "test@gmail.com"
     assert json["name"] == "mr_bean"
-    assert json["verified"] == False
+    assert json["verified"] is False
     assert datetime.fromisoformat(json["createdAt"])
     assert datetime.fromisoformat(json["updatedAt"])
 

@@ -14,8 +14,9 @@
   },
 
   "settings": {
-    "python.formatting.provider": "black",
     "python.venvPath": ".venv",
-    "python.linting.pylintEnabled": false
+    "python.formatting.provider": "black",
+    "python.pythonPath": "/app/.venv/bin/python",
+    "python.linting.pylintPath": "/app/.venv/bin/pylint"
   }
 }

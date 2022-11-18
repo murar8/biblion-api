@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import Field, root_validator, validator
+from pydantic import BaseModel
 
 
 class GetPostsParams(BaseModel):
@@ -27,8 +28,8 @@ class GetPostsParams(BaseModel):
 
     @property
     def created_at_ts(self):
-        ts = self.createdAt.split(":", 1)[1]
-        return datetime.fromisoformat(ts)
+        timestamp = self.createdAt.split(":", 1)[1]
+        return datetime.fromisoformat(timestamp)
 
     @property
     def updated_at_cmp(self):
@@ -36,10 +37,11 @@ class GetPostsParams(BaseModel):
 
     @property
     def updated_at_ts(self):
-        ts = self.updatedAt.split(":", 1)[1]
-        return datetime.fromisoformat(ts)
+        timestamp = self.updatedAt.split(":", 1)[1]
+        return datetime.fromisoformat(timestamp)
 
     @validator("sort")
+    @classmethod
     def validate_sort(cls, sort):
         if ":" not in sort:
             raise ValueError(f"Invalid sort param: '{sort}'")
@@ -55,6 +57,7 @@ class GetPostsParams(BaseModel):
         return sort
 
     @root_validator()
+    @classmethod
     def validate_timestamps(cls, values):
         for timestamp in ["createdAt", "updatedAt"]:
             value = values.get(timestamp)
@@ -72,12 +75,13 @@ class GetPostsParams(BaseModel):
 
             try:
                 datetime.fromisoformat(date)
-            except:
-                raise ValueError(f"Invalid {timestamp} date: '{date}'")
+            except Exception as exception:
+                raise ValueError(f"Invalid {timestamp} date: '{date}'") from exception
 
         return values
 
     @root_validator()
+    @classmethod
     def validate_token(cls, values):
         token = values.get("token")
 
@@ -90,12 +94,14 @@ class GetPostsParams(BaseModel):
         if sort_key in ["createdAt", "updatedAt"]:
             try:
                 values["token"] = datetime.fromisoformat(token)
-            except:
-                raise ValueError("Continuation token must be an ISO8601 date string.")
+            except Exception as exception:
+                raise ValueError(
+                    "Continuation token must be an ISO8601 date string."
+                ) from exception
 
         if sort_key in ["id", "name"]:
-            if not isinstance(token, str) or not len(token):
-                raise ValueError(f"Continuation token must be a non-empty string.")
+            if not isinstance(token, str) or len(token) == 0:
+                raise ValueError("Continuation token must be a non-empty string.")
 
         return values
 

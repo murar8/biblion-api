@@ -4,17 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyjwt = { extras = ["crypto"], version = "*" }
+bcrypt = "*"
 fastapi = { extras = ["all"], version = "*" }
 motor = "*"
-bcrypt = "*"
+pyjwt = { extras = ["crypto"], version = "*" }
 
 [dev-packages]
 black = "*"
+httpx = "*"
+pre-commit = "*"
+pylint = "*"
 pytest = "*"
 pytest-asyncio = "*"
 pytest-dotenv = "*"
-httpx = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 
 [requires]
@@ -23,3 +25,6 @@ python_version = "3.10"
 [scripts]
 serve = "uvicorn app:app --reload --host 0.0.0.0 --env-file .env.development"
 test = "pytest ."
+format = "black ."
+lint = "pylint app tests"
+pre-commit-install = "pre-commit install"

@@ -17,23 +17,29 @@ from app.util.config import Config
 router = APIRouter()
 
 
-@router.get("/{id}", response_model=UserResponse)
-async def get_user(id: str, db: Database = Depends(get_db)):
-    if user := await db.users.find_one({"_id": uuid.UUID(id)}):
-        return UserResponse.from_mongo(user)
-    else:
+@router.get("/{uid}", response_model=UserResponse)
+async def get_user(uid: str, database: Database = Depends(get_db)):
+    user = await database.users.find_one({"_id": uuid.UUID(uid)})
+
+    if not user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+
+    return UserResponse.from_mongo(user)
 
 
 @router.post("/", response_model=UserResponse, status_code=HTTPStatus.CREATED)
 async def create_user(
     body: CreateUserRequest,
-    db: Database = Depends(get_db),
+    database: Database = Depends(get_db),
 ):
-    if await db.users.find_one({"$or": [{"email": body.email}, {"name": body.name}]}):
+    user = await database.users.find_one(
+        {"$or": [{"email": body.email}, {"name": body.name}]}
+    )
+
+    if user:
         raise HTTPException(status_code=HTTPStatus.CONFLICT)
 
-    createdAt = datetime.utcnow()
+    created_at = datetime.utcnow()
     salt = bcrypt.gensalt()
     password_hash = bcrypt.hashpw(body.password.encode(), salt)
 
@@ -43,24 +49,24 @@ async def create_user(
         "name": body.name,
         "password_hash": password_hash,
         "verified": False,
-        "createdAt": createdAt,
-        "updatedAt": createdAt,
+        "createdAt": created_at,
+        "updatedAt": created_at,
     }
 
-    res = await db.users.insert_one(document=document)
-    user = await db.users.find_one({"_id": res.inserted_id})
+    res = await database.users.insert_one(document=document)
+    user = await database.users.find_one({"_id": res.inserted_id})
 
     return UserResponse.from_mongo(user)
 
 
-@router.patch("/{id}", response_model=UserResponse)
+@router.patch("/{uid}", response_model=UserResponse)
 async def update_user(
-    id: str,
+    uid: str,
     body: UpdateUserRequest,
     jwt: AccessToken = Depends(get_jwt),
-    db: Database = Depends(get_db),
+    database: Database = Depends(get_db),
 ):
-    if id != jwt.sub:
+    if uid != jwt.sub:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
     document = {"updatedAt": datetime.utcnow()}
@@ -75,12 +81,14 @@ async def update_user(
         salt = bcrypt.gensalt()
         document["password_hash"] = bcrypt.hashpw(body.password.encode(), salt)
 
-    result = await db.users.update_one({"_id": uuid.UUID(id)}, {"$set": document})
+    result = await database.users.update_one(
+        {"_id": uuid.UUID(uid)}, {"$set": document}
+    )
 
     if not result.matched_count:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
 
-    user = await db.users.find_one({"_id": uuid.UUID(id)})
+    user = await database.users.find_one({"_id": uuid.UUID(uid)})
     return UserResponse.from_mongo(user)
 
 
@@ -88,10 +96,10 @@ async def update_user(
 async def login_user(
     body: LoginUserRequest,
     response: Response,
-    db: Database = Depends(get_db),
+    database: Database = Depends(get_db),
     config: Config = Depends(get_config),
 ):
-    user = await db.users.find_one(
+    user = await database.users.find_one(
         {"$or": [{"email": body.email}, {"name": body.name}]}
     )
 

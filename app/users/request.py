@@ -21,6 +21,7 @@ class LoginUserRequest(BaseModel):
     password: str
 
     @root_validator()
+    @classmethod
     def validate_identifier(cls, values):
         email: str = values.get("email")
         name: str = values.get("name")

@@ -23,7 +23,7 @@ def event_loop():
 async def app_db():
     config = Config()
     client = AsyncIOMotorClient(config.database.url, uuidRepresentation="standard")
-    db = client[config.database.name]
+    database = client[config.database.name]
 
     posts_seed = [
         {
@@ -69,7 +69,10 @@ async def app_db():
             "_id": uuid.UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
             "email": "mrbrown@user.com",
             "name": "mr_brown",
-            "password_hash": b"$2b$12$AccWeQEg2szEkty9YCWLa.1Y2snNhc.DTmk97Qveg8hpDgm9.O2kG",  # pw: "hastasiempre"
+            "password_hash": (
+                # pw: "hastasiempre"
+                b"$2b$12$AccWeQEg2szEkty9YCWLa.1Y2snNhc.DTmk97Qveg8hpDgm9.O2kG"
+            ),
             "verified": True,
             "createdAt": datetime(2002, 10, 27, 2, 0, 0),
             "updatedAt": datetime(2002, 10, 28, 14, 0, 0),
@@ -78,7 +81,10 @@ async def app_db():
             "_id": uuid.UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
             "email": "mrgreen@user.com",
             "name": "mr_green",
-            "password_hash": b"$2b$12$tToXPOgFqXrqjuIdCXODZeXK0IfL.kz7sZ1/SxWRvN3Zn.TZYe7MW",  # pw: "hastanunca"
+            "password_hash": (
+                # pw: "hastanunca"
+                b"$2b$12$tToXPOgFqXrqjuIdCXODZeXK0IfL.kz7sZ1/SxWRvN3Zn.TZYe7MW"
+            ),
             "verified": False,
             "createdAt": datetime(2002, 10, 27, 2, 0, 0),
             "updatedAt": datetime(2002, 10, 28, 14, 0, 0),
@@ -86,10 +92,10 @@ async def app_db():
     ]
 
     await client.drop_database(config.database.name)
-    await db.posts.insert_many(posts_seed)
-    await db.users.insert_many(users_seed)
+    await database.posts.insert_many(posts_seed)
+    await database.users.insert_many(users_seed)
 
-    yield db
+    yield database
 
 
 @pytest_asyncio.fixture()
@@ -108,7 +114,11 @@ async def app_client(request):
 
         client.cookies.set(
             "access_token",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FwaS5iaWJsaW9uLmNvbSIsInN1YiI6ImY0YzhlMTQyLTVhOGUtNDc1OS05ZWVjLTc0ZDkxMzlkY2ZkNSIsImF1ZCI6Imh0dHBzOi8vYXBpLmJpYmxpb24uY29tIiwiaWF0IjoxNjY3NzY2Mzg0LjA0MjQ4NjQsImV4cCI6MjY2Nzc2NjM4NC4wNDI0ODZ9.Dnk6k40e56or2u79rPJelZnYwJHY5QoLwN94kkFMcP0",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FwaS5ia"
+            "WJsaW9uLmNvbSIsInN1YiI6ImY0YzhlMTQyLTVhOGUtNDc1OS05ZWVjLTc0ZDkxMzl"
+            "kY2ZkNSIsImF1ZCI6Imh0dHBzOi8vYXBpLmJpYmxpb24uY29tIiwiaWF0IjoxNjY3N"
+            "zY2Mzg0LjA0MjQ4NjQsImV4cCI6MjY2Nzc2NjM4NC4wNDI0ODZ9.Dnk6k40e56or2u"
+            "79rPJelZnYwJHY5QoLwN94kkFMcP0",
         )
 
     yield client

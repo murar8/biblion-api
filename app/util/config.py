@@ -1,7 +1,8 @@
-from pydantic import AnyUrl, BaseSettings, conint
+from pydantic import AnyUrl, conint
+import pydantic
 
 
-class JwtConfig(BaseSettings):
+class JwtConfig(pydantic.BaseSettings):
     algorithm: str
     secret: str
     audience: str
@@ -12,7 +13,7 @@ class JwtConfig(BaseSettings):
         env_prefix = "JWT_"
 
 
-class DatabaseConfig(BaseSettings):
+class DatabaseConfig(pydantic.BaseSettings):
     url: AnyUrl
     name: str
 
@@ -20,6 +21,6 @@ class DatabaseConfig(BaseSettings):
         env_prefix = "DATABASE_"
 
 
-class Config(BaseSettings):
+class Config(pydantic.BaseSettings):
     jwt = JwtConfig()
     database = DatabaseConfig()

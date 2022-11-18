@@ -17,7 +17,9 @@ router = APIRouter()
 
 
 @router.get("/", response_model=PaginatedResponse[PostResponse])
-async def get_posts(query: GetPostsParams = Depends(), db: Database = Depends(get_db)):
+async def get_posts(
+    query: GetPostsParams = Depends(), database: Database = Depends(get_db)
+):
     sort_key = query.sort_key if query.sort_key != "id" else "_id"
     sort_order = pymongo.ASCENDING if query.sort_order == "asc" else pymongo.DESCENDING
 
@@ -29,7 +31,7 @@ async def get_posts(query: GetPostsParams = Depends(), db: Database = Depends(ge
         else [(sort_key, sort_order), ("_id", pymongo.ASCENDING)]
     )
 
-    find = dict()
+    find = {}
 
     if query.createdAt:
         find["createdAt"] = {f"${query.created_at_cmp}": query.created_at_ts}
@@ -42,7 +44,7 @@ async def get_posts(query: GetPostsParams = Depends(), db: Database = Depends(ge
     if query.token:
         find[sort_key] = {"$gt": query.token}
 
-    cursor = db.posts.find(find)
+    cursor = database.posts.find(find)
     cursor.sort(sort)
     if query.count:
         cursor.limit(query.count)
@@ -53,72 +55,74 @@ async def get_posts(query: GetPostsParams = Depends(), db: Database = Depends(ge
     return PaginatedResponse(data=items, token=token)
 
 
-@router.get("/{id}", response_model=PostResponse)
-async def get_post(id: str, db: Database = Depends(get_db)):
-    if post := await db.posts.find_one({"_id": id}):
-        return PostResponse.from_mongo(post)
-    else:
+@router.get("/{uid}", response_model=PostResponse)
+async def get_post(uid: str, database: Database = Depends(get_db)):
+    post = await database.posts.find_one({"_id": uid})
+
+    if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+
+    return PostResponse.from_mongo(post)
 
 
 @router.post("/", response_model=PostResponse, status_code=HTTPStatus.CREATED)
 async def create_post(
     body: CreatePostRequest,
     jwt: AccessToken = Depends(get_jwt),
-    db: Database = Depends(get_db),
+    database: Database = Depends(get_db),
 ):
     # We use short ids to make it easy for users to share posts by id, so we
     # have to take into account the (unlikely) possibility of having two ids clashing.
     while True:
-        id = generate_shortid()
+        uid = generate_shortid()
 
-        if await db.posts.find_one({"_id": id}):
+        if await database.posts.find_one({"_id": uid}):
             continue
 
-        createdAt = datetime.utcnow()
+        created_at = datetime.utcnow()
         document = {
-            "_id": id,
+            "_id": uid,
             "ownerId": jwt.sub,
-            "createdAt": createdAt,
-            "updatedAt": createdAt,
+            "createdAt": created_at,
+            "updatedAt": created_at,
             **body.dict(),
         }
-        await db.posts.insert_one(document=document)
+        await database.posts.insert_one(document=document)
 
-        post = await db.posts.find_one({"_id": id})
+        post = await database.posts.find_one({"_id": uid})
         return PostResponse.from_mongo(post)
 
 
-@router.patch("/{id}", response_model=PostResponse)
+@router.patch("/{uid}", response_model=PostResponse)
 async def update_post(
-    id: str,
+    uid: str,
     body: UpdatePostRequest,
     jwt: AccessToken = Depends(get_jwt),
-    db: Database = Depends(get_db),
+    database: Database = Depends(get_db),
 ):
-    ownerId = uuid.UUID(jwt.sub)
+    owner_id = uuid.UUID(jwt.sub)
 
-    where = {"_id": id, "ownerId": ownerId}
+    where = {"_id": uid, "ownerId": owner_id}
     update = {"$set": {**body.dict(exclude_unset=True), "updatedAt": datetime.utcnow()}}
-    await db.posts.update_one(where, update)
-    post = await db.posts.find_one({"_id": id})
+    await database.posts.update_one(where, update)
+    post = await database.posts.find_one({"_id": uid})
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
 
-    if post["ownerId"] != ownerId:
+    if post["ownerId"] != owner_id:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
     return PostResponse.from_mongo(post)
 
 
-@router.delete("/{id}", status_code=HTTPStatus.NO_CONTENT)
+@router.delete("/{uid}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_post(
-    id: str,
+    uid: str,
     jwt: AccessToken = Depends(get_jwt),
-    db: Database = Depends(get_db),
+    database: Database = Depends(get_db),
 ):
-    post = await db.posts.find_one({"_id": id})
+    post = await database.posts.find_one({"_id": uid})
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
@@ -126,4 +130,4 @@ async def delete_post(
     if post["ownerId"] != uuid.UUID(jwt.sub):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
-    await db.posts.delete_one({"_id": id})
+    await database.posts.delete_one({"_id": uid})

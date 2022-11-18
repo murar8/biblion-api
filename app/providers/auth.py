@@ -13,7 +13,11 @@ def get_jwt(
 ):
     try:
         return AccessToken.decode(access_token, config.jwt)
-    except (DecodeError):
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid JWT.")
-    except (ExpiredSignatureError):
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Expired JWT.")
+    except (DecodeError, ExpiredSignatureError) as exception:
+        detail = (
+            "Expired JWT." if exception is ExpiredSignatureError else "Invalid JWT."
+        )
+
+        status_code = HTTPStatus.UNAUTHORIZED
+
+        raise HTTPException(status_code=status_code, detail=detail) from exception
