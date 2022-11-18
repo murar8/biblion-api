@@ -12,18 +12,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install
-        run: |
-          pip install pipenv --user
-          $HOME/.local/bin/pipenv install --dev
+      - name: Install pipenv
+        run: pip install pipenv wrapt --user
+
+      - name: Install dependencies
+        run: $HOME/.local/bin/pipenv install --dev
 
       - name: Format
-        run: |
-          $HOME/.local/bin/pipenv run format
+        run: $HOME/.local/bin/pipenv run format
 
       - name: Lint
-        run: |
-          $HOME/.local/bin/pipenv run lint
+        run: $HOME/.local/bin/pipenv run lint
 
       # - name: Test
       #   run: docker compose -f docker-compose.test.yml run test
