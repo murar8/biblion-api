@@ -17,6 +17,7 @@ jobs:
 
       - name: Lint
         run: |
+          pip install pipenv
           pipenv install --dev
           pipenv run lint
 
