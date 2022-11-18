@@ -14,16 +14,16 @@ jobs:
 
       - name: Install
         run: |
-          pip install pylint --user
-          pipenv install --dev
+          pip install pipenv
+          $HOME/.local/bin/pipenv install --dev
 
       - name: Format
         run: |
-          pipenv run format
+          $HOME/.local/bin/pipenv run format
 
       - name: Lint
         run: |
-          pipenv run lint
+          $HOME/.local/bin/pipenv run lint
 
       # - name: Test
       #   run: docker compose -f docker-compose.test.yml run test
