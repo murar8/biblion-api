@@ -16,7 +16,7 @@ jobs:
         run: pip install pipenv
 
       - name: Install dependencies
-        run: pipenv pipenv install --deploy --ignore-pipfile --system --dev
+        run: pipenv install --deploy --ignore-pipfile --system --dev
 
       - name: Format
         run: black .
