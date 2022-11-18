@@ -6,12 +6,24 @@
 
 This project contains the backend functionality for the biblion project, a simple pastebin-like file upload service.
 
+## Tech stack
+
+|                        |                                          |
+| ---------------------- | ---------------------------------------- |
+| Programming Language   | [Python](https://www.python.org/)        |
+| Web Framework          | [FastAPI](https://fastapi.tiangolo.com/) |
+| Data Persistence Layer | [MongoDB](https://www.mongodb.com/)      |
+
 ## Features
 
 - Full integration test suite
 - Automated deployment as a Docker container to the GitHub registry using GitHub Actions
 
 ## Local development
+
+The easiest way to run the project locally is to open the repository inside the preconfigured development container featuring all the necessary dependencies. For more information visit [https://code.visualstudio.com/docs/devcontainers/containers](). Alternatively you will need to manually set up a MongoDB instance to be used for development and testing.
+
+It is recommended to run `pipenv run pre-commit-install` after cloning the repository, this will add a pre-commit check to make sure the contributed code follows the project guidelines without waiting for the CI check.
 
 - Start a development server: `pipenv run serve`
 - Run the integration test suite: `pipenv run test`
