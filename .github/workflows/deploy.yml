@@ -21,7 +21,7 @@ jobs:
         run: pip install pipenv
 
       - name: Install dependencies
-        run: pipenv install --dev
+        run: pipenv install --deploy --ignore-pipfile --three --dev
 
       - name: Format
         run: pipenv run format
