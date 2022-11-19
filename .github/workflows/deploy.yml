@@ -18,7 +18,7 @@ jobs:
       # Not sure why we need to do this but we need to install wrapt manually
       # to be able to run pylint.
       - name: Install pipenv
-        run: pip install pipenv
+        run: pip install pipenv wrapt
 
       - name: Install dependencies
         run: pipenv install --deploy --ignore-pipfile --three --dev
