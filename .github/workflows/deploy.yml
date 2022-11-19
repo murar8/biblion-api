@@ -12,17 +12,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - uses: actions/setup-python@v4
+        with: { python-version: "3.10" }
+
+      # Not sure why we need to do this but we need to install wrapt manually
+      # to be able to run pylint.
       - name: Install pipenv
-        run: pip install pipenv wrapt
+        run: pip install pipenv
 
       - name: Install dependencies
-        run: pipenv install --deploy --ignore-pipfile --system --dev
+        run: pipenv install --dev
 
       - name: Format
-        run: black .
+        run: pipenv run format
 
       - name: Lint
-        run: pylint app tests
+        run: pipenv run lint
 
       # - name: Test
       #   run: docker compose -f docker-compose.test.yml run test
