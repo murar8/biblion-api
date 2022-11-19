@@ -18,6 +18,7 @@ pytest = "*"
 pytest-asyncio = "*"
 pytest-dotenv = "*"
 uvicorn = {extras = ["standard"], version = "*"}
+wrapt = "*" # We need this package to be installed to be able to run PyLint in CI.
 
 [requires]
 python_version = "3.10"
