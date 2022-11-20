@@ -1,7 +1,6 @@
 services:
   test:
-    build:
-      dockerfile: Dockerfile.test
+    build: { context: ., dockerfile: Dockerfile.test }
     volumes: [./:/app:cached]
     depends_on: [mongo, mailhog]
 
