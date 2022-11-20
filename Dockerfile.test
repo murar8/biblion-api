@@ -16,5 +16,5 @@ RUN pipenv install --deploy --ignore-pipfile --clear
 
 COPY ./app ./app/
 
-CMD pipenv run -- /app/.venv/bin/pytest -p no:cacheprovider . 
+CMD pipenv run -- pytest -p no:cacheprovider . 
 
