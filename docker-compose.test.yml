@@ -1,0 +1,9 @@
+services:
+  test:
+    build:
+      dockerfile: Dockerfile.test
+    volumes: [./:/app:cached]
+    depends_on: [mongo, mailhog]
+
+networks:
+  default: { name: "biblion-network" }

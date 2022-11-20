@@ -1,0 +1,10 @@
+services:
+  vscode:
+    image: mcr.microsoft.com/vscode/devcontainers/python:3.10
+    volumes: [./:/app:cached]
+    depends_on: [mongo, mailhog]
+    init: true
+    command: sleep infinity
+
+networks:
+  default: { name: "biblion-network" }

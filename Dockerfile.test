@@ -1,0 +1,20 @@
+FROM python:3.10
+
+RUN adduser --system python
+
+RUN pip install --no-cache --upgrade pip && pip install --no-cache pipenv
+
+RUN mkdir /app /app/.pytest_cache && chown -R python /app
+
+USER python
+
+WORKDIR /app
+
+COPY ./Pipfile ./Pipfile.lock ./
+
+RUN pipenv install --deploy --ignore-pipfile --clear
+
+COPY ./app ./app/
+
+CMD pipenv run -- pytest -p no:cacheprovider . 
+

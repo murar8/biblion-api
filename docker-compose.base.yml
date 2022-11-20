@@ -1,11 +1,4 @@
 services:
-  biblion:
-    image: mcr.microsoft.com/vscode/devcontainers/python:3.10
-    volumes: [../:/app:cached]
-    depends_on: [mongo]
-    init: true
-    command: sleep infinity
-
   mongo:
     image: mongo:5
     restart: unless-stopped
