@@ -16,7 +16,10 @@
   "settings": {
     "python.venvPath": ".venv",
     "python.formatting.provider": "black",
-    "python.pythonPath": "/app/.venv/bin/python",
-    "python.linting.pylintPath": "/app/.venv/bin/pylint"
+    "python.defaultInterpreterPath": "/app/.venv/bin/python",
+    "python.linting.pylintPath": "/app/.venv/bin/pylint",
+    "yaml.schemas": {
+      "https://json.schemastore.org/github-workflow.json": "file:///app/.github/workflows/deploy.yml"
+    }
   }
 }
