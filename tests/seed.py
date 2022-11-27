@@ -1,0 +1,84 @@
+from datetime import datetime
+import uuid
+
+
+posts_seed = [
+    {
+        "_id": "a46yh2d3",
+        "ownerId": uuid.UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
+        "content": "console.log('Hello, world!')",
+        "name": "hello.js",
+        "language": "js",
+        "createdAt": datetime(2002, 10, 27, 2, 0, 0),
+        "updatedAt": datetime(2002, 10, 28, 14, 0, 0),
+    },
+    {
+        "_id": "bdu764rt",
+        "ownerId": uuid.UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
+        "content": "Hello, world!",
+        "name": "hello.txt",
+        "language": "txt",
+        "createdAt": datetime(2002, 10, 27, 6, 0, 0),
+        "updatedAt": datetime(2002, 10, 28, 11, 0, 0),
+    },
+    {
+        "_id": "ctrdg53d",
+        "ownerId": uuid.UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
+        "content": "console.log('Hello, world!')",
+        "name": "test.ts",
+        "language": "ts",
+        "createdAt": datetime(2002, 10, 27, 3, 0, 0),
+        "updatedAt": datetime(2002, 10, 28, 22, 0, 0),
+    },
+    {
+        "_id": "d7yhmbr5",
+        "ownerId": uuid.UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
+        "content": "Hello, world!",
+        "name": "hi.txt",
+        "language": "txt",
+        "createdAt": datetime(2002, 10, 27, 1, 0, 0),
+        "updatedAt": datetime(2002, 10, 28, 18, 0, 0),
+    },
+]
+
+
+users_seed = [
+    {
+        "_id": uuid.UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
+        "email": "mrbrown@user.com",
+        "name": "mr_brown",
+        "password_hash": (
+            # pw: "hastasiempre"
+            b"$2b$12$AccWeQEg2szEkty9YCWLa.1Y2snNhc.DTmk97Qveg8hpDgm9.O2kG"
+        ),
+        "verified": True,
+        "createdAt": datetime(2002, 10, 27, 2, 0, 0),
+        "updatedAt": datetime(2002, 10, 28, 14, 0, 0),
+    },
+    {
+        "_id": uuid.UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
+        "email": "mrgreen@user.com",
+        "name": "mr_green",
+        "password_hash": (
+            # pw: "hastanunca"
+            b"$2b$12$tToXPOgFqXrqjuIdCXODZeXK0IfL.kz7sZ1/SxWRvN3Zn.TZYe7MW"
+        ),
+        "verified": False,
+        "createdAt": datetime(2002, 10, 27, 2, 0, 0),
+        "updatedAt": datetime(2002, 10, 28, 14, 0, 0),
+    },
+    {
+        "_id": uuid.UUID("af71f215-c3f8-441f-9498-e75f8dfbcf4b"),
+        "email": "mrred@user.com",
+        "name": "mr_red",
+        "password_hash": (
+            # pw: "hastacuando"
+            b"$2b$12$yp9ipcT4VdpkMmwSNTaoied19ElSKuKtjeONj.7.nb5HUZllHvMx."
+        ),
+        "verified": False,
+        "createdAt": datetime(2002, 10, 22, 2, 0, 0),
+        "updatedAt": datetime(2002, 11, 28, 14, 0, 0),
+        "verification_code": uuid.UUID("03d06d59-5fd5-4c49-bafe-91bab21d1391"),
+        "verification_code_iat": datetime.now(),
+    },
+]
