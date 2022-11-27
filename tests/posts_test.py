@@ -6,7 +6,6 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": False}], indirect=True)
 async def test_get_post(app_client: AsyncClient):
     response = await app_client.get("posts/bdu764rt")
     json = response.json()
@@ -22,14 +21,12 @@ async def test_get_post(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": False}], indirect=True)
 async def test_get_post_non_existent(app_client: AsyncClient):
     response = await app_client.get("posts/fakeid")
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": False}], indirect=True)
 async def test_get_posts(app_client: AsyncClient):
     response = await app_client.get("posts")
     json = response.json()
@@ -40,7 +37,6 @@ async def test_get_posts(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": False}], indirect=True)
 async def test_get_posts_paging(app_client: AsyncClient):
     params = {"count": 2, "sort": "id:asc"}
     response = await app_client.get("posts", params=params)
@@ -62,7 +58,6 @@ async def test_get_posts_paging(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": False}], indirect=True)
 async def test_get_posts_sort(app_client: AsyncClient):
     response = await app_client.get("posts", params={"sort": "createdAt:desc"})
     json = response.json()
@@ -73,7 +68,6 @@ async def test_get_posts_sort(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": False}], indirect=True)
 async def test_get_posts_updated_at(app_client: AsyncClient):
     params = {
         "updatedAt": f"gt:{datetime(2002, 10, 28, 14, 0, 0).isoformat()}",
@@ -89,7 +83,6 @@ async def test_get_posts_updated_at(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": False}], indirect=True)
 async def test_get_posts_owner_id(app_client: AsyncClient):
     params = {"ownerId": "34b8028f-a220-498e-85c9-7304e44cb272", "sort": "id:asc"}
     response = await app_client.get("posts", params=params)
@@ -102,7 +95,6 @@ async def test_get_posts_owner_id(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": False}], indirect=True)
 async def test_get_posts_language(app_client: AsyncClient):
     params = {"language": "js", "sort": "id:asc"}
     response = await app_client.get("posts", params=params)
@@ -114,7 +106,7 @@ async def test_get_posts_language(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": True}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_create_post(app_client: AsyncClient):
     response = await app_client.post("posts", json={"content": "Test"})
     json = response.json()
@@ -128,7 +120,7 @@ async def test_create_post(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": True}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post(app_client: AsyncClient):
     now = datetime.utcnow()
     data = {"content": "Hello, You!"}
@@ -146,7 +138,7 @@ async def test_update_post(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": True}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post_non_existent(app_client: AsyncClient):
     data = {"content": "console.log('Update!')"}
     response = await app_client.patch("posts/fakeid", json=data)
@@ -154,7 +146,7 @@ async def test_update_post_non_existent(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": True}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post_non_owned(app_client: AsyncClient):
     data = {"content": "console.log('Update!')"}
     response = await app_client.patch("posts/ctrdg53d", json=data)
@@ -162,21 +154,21 @@ async def test_update_post_non_owned(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": True}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_delete_post(app_client: AsyncClient):
     response = await app_client.delete("posts/bdu764rt")
     assert response.status_code == HTTPStatus.NO_CONTENT
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": True}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_delete_post_non_owned(app_client: AsyncClient):
     response = await app_client.delete("posts/ctrdg53d")
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"authorized": True}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_delete_post_non_existent(app_client: AsyncClient):
     response = await app_client.delete("posts/fakeid")
     assert response.status_code == HTTPStatus.NOT_FOUND

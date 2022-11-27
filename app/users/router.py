@@ -1,14 +1,20 @@
+from functools import reduce
+import smtplib
+from urllib.parse import urljoin
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+from email.message import EmailMessage
 from http import HTTPStatus
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
+from jinja2 import Environment, FileSystemLoader
 from pymongo.database import Database
 
 from app.providers.auth import get_jwt
 from app.providers.config import get_config
 from app.providers.database import get_db
+from app.providers.logged_user import get_logged_user
 from app.users.request import CreateUserRequest, LoginUserRequest, UpdateUserRequest
 from app.users.response import UserResponse
 from app.util.access_token import AccessToken
@@ -118,3 +124,75 @@ async def login_user(
     )
 
     return UserResponse.from_mongo(user)
+
+
+@router.post("/verification_code", status_code=HTTPStatus.NO_CONTENT)
+async def request_verification_code(
+    database: Database = Depends(get_db),
+    config: Config = Depends(get_config),
+    user=Depends(get_logged_user),
+):
+    verification_code = uuid.uuid4()
+
+    content = {
+        "verification_code": verification_code,
+        "verification_code_iat": datetime.now(),
+    }
+
+    await database.users.update_one({"_id": user["_id"]}, {"$set": content})
+
+    environment = Environment(loader=FileSystemLoader("templates/"))
+    template = environment.get_template("email-confirmation.html")
+
+    confirmation_url = reduce(
+        urljoin, [config.website.base_url, "verify/", str(verification_code)]
+    )
+
+    content = template.render(
+        base_url=config.website.base_url, confirmation_url=confirmation_url
+    )
+
+    email = EmailMessage()
+    email.set_content(content, "html")
+
+    email["Subject"] = "Verify your address"
+    email["From"] = config.email.sender
+    email["To"] = user["email"]
+
+    with smtplib.SMTP(config.email.smtp_server) as smtp:
+        smtp.send_message(email)
+
+
+@router.post("/verify/{code}", status_code=HTTPStatus.NO_CONTENT)
+async def verify_user(
+    code: str,
+    database: Database = Depends(get_db),
+    user=Depends(get_logged_user),
+    config: Config = Depends(get_config),
+):
+    if "verification_code" not in user or "verification_code_iat" not in user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="No account verification requests found.",
+        )
+
+    expiration_delta = timedelta(0, config.email.verification_expiration)
+    expiration = user["verification_code_iat"] + expiration_delta
+
+    if expiration < datetime.now():
+        raise HTTPException(
+            status_code=HTTPStatus.GONE, detail="Verification code has expired."
+        )
+
+    if user["verification_code"] != uuid.UUID(code):
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail="Verification code is invalid."
+        )
+
+    await database.users.update_one(
+        {"_id": user["_id"]},
+        {
+            "$set": {"verified": True},
+            "$unset": {"verification_code": "", "verification_code_iat": ""},
+        },
+    )

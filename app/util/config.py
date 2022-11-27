@@ -1,5 +1,5 @@
-from pydantic import AnyUrl, conint
 import pydantic
+from pydantic import AnyUrl, EmailStr, conint
 
 
 class JwtConfig(pydantic.BaseSettings):
@@ -21,6 +21,24 @@ class DatabaseConfig(pydantic.BaseSettings):
         env_prefix = "DATABASE_"
 
 
+class EmailConfig(pydantic.BaseSettings):
+    sender: EmailStr
+    smtp_server: str
+    verification_expiration: conint(gt=0)
+
+    class Config:
+        env_prefix = "EMAIL_"
+
+
+class WebsiteConfig(pydantic.BaseSettings):
+    base_url: AnyUrl
+
+    class Config:
+        env_prefix = "WEBSITE_"
+
+
 class Config(pydantic.BaseSettings):
+    website = WebsiteConfig()
     jwt = JwtConfig()
     database = DatabaseConfig()
+    email = EmailConfig()
