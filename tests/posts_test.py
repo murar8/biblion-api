@@ -28,81 +28,50 @@ async def test_get_post_non_existent(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_posts(app_client: AsyncClient):
-    response = await app_client.get("posts")
+    response = await app_client.get("posts", params={"limit": "32"})
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
-    assert len(json["data"]) == 4
-    assert json["token"]
+    assert json["hasMore"] is False
+    assert json["totalCount"] == 4
+    assert json["data"][0]["id"] == "ctrdg53d"
+    assert json["data"][-1]["id"] == "bdu764rt"
 
 
 @pytest.mark.asyncio
 async def test_get_posts_paging(app_client: AsyncClient):
-    params = {"count": 2, "sort": "id:asc"}
+    params = {"limit": "2", "skip": "1"}
     response = await app_client.get("posts", params=params)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
-    assert len(json["data"]) == 2
-    assert json["data"][0]["id"] == "a46yh2d3"
-    assert json["data"][1]["id"] == "bdu764rt"
-
-    params = {"count": 4, "sort": "id:asc", "token": json["token"]}
-    response = await app_client.get("posts", params=params)
-    json = response.json()
-
-    assert response.status_code == HTTPStatus.OK
-    assert len(json["data"]) == 2
-    assert json["data"][0]["id"] == "ctrdg53d"
-    assert json["data"][1]["id"] == "d7yhmbr5"
-
-
-@pytest.mark.asyncio
-async def test_get_posts_sort(app_client: AsyncClient):
-    response = await app_client.get("posts", params={"sort": "createdAt:desc"})
-    json = response.json()
-
-    assert response.status_code == HTTPStatus.OK
-    assert json["data"][0]["id"] == "bdu764rt"
-    assert json["data"][-1]["id"] == "d7yhmbr5"
-
-
-@pytest.mark.asyncio
-async def test_get_posts_updated_at(app_client: AsyncClient):
-    params = {
-        "updatedAt": f"gt:{datetime(2002, 10, 28, 14, 0, 0).isoformat()}",
-        "sort": "id:asc",
-    }
-    response = await app_client.get("posts", params=params)
-    json = response.json()
-
-    assert response.status_code == HTTPStatus.OK
-    assert len(json["data"]) == 2
-    assert json["data"][0]["id"] == "ctrdg53d"
-    assert json["data"][1]["id"] == "d7yhmbr5"
+    assert json["totalCount"] == 4
+    assert json["hasMore"] is True
+    assert json["data"][0]["id"] == "d7yhmbr5"
+    assert json["data"][1]["id"] == "a46yh2d3"
 
 
 @pytest.mark.asyncio
 async def test_get_posts_owner_id(app_client: AsyncClient):
-    params = {"ownerId": "34b8028f-a220-498e-85c9-7304e44cb272", "sort": "id:asc"}
+    params = {"ownerId": "f4c8e142-5a8e-4759-9eec-74d9139dcfd5"}
     response = await app_client.get("posts", params=params)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
-    assert len(json["data"]) == 2
-    assert json["data"][0]["id"] == "ctrdg53d"
-    assert json["data"][1]["id"] == "d7yhmbr5"
+    assert json["totalCount"] == 2
+    assert json["data"][0]["id"] == "a46yh2d3"
+    assert json["data"][1]["id"] == "bdu764rt"
 
 
 @pytest.mark.asyncio
 async def test_get_posts_language(app_client: AsyncClient):
-    params = {"language": "js", "sort": "id:asc"}
+    params = {"language": "ts"}
     response = await app_client.get("posts", params=params)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
-    assert len(json["data"]) == 1
-    assert json["data"][0]["id"] == "a46yh2d3"
+    assert json["totalCount"] == 1
+    assert json["data"][0]["id"] == "ctrdg53d"
 
 
 @pytest.mark.asyncio

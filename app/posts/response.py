@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import Any, Generic, Optional, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
 T = TypeVar("T")
@@ -11,10 +12,8 @@ T = TypeVar("T")
 
 class PaginatedResponse(GenericModel, Generic[T]):
     data: list[T]
-    token: Optional[str] = Field(
-        default=None,
-        description="Continuation token to define the starting offset of the query.",
-    )
+    hasMore: bool
+    totalCount: int
 
     @classmethod
     def __concrete_name__(cls: type[Any], params: tuple[type[Any], ...]) -> str:
@@ -27,16 +26,14 @@ class PaginatedResponse(GenericModel, Generic[T]):
 
 class PostResponse(BaseModel):
     id: str
-    ownerId: Optional[uuid.UUID]
+    ownerId: uuid.UUID
     name: Optional[str]
     language: Optional[str]
     content: str
-    createdAt: str
-    updatedAt: str
+    createdAt: datetime
+    updatedAt: datetime
 
     @staticmethod
     def from_mongo(post: dict[str, any]) -> PostResponse:
         post["id"] = post.pop("_id")
-        post["createdAt"] = post.pop("createdAt").isoformat()
-        post["updatedAt"] = post.pop("updatedAt").isoformat()
         return PostResponse(**post)
