@@ -56,19 +56,21 @@ async def test_create_user_invalid(app_client: AsyncClient):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_user(app_client: AsyncClient):
+    data = {"email": "mrbrown2@user.com"}
+
     response = await app_client.patch(
-        "users/f4c8e142-5a8e-4759-9eec-74d9139dcfd5",
-        json={"email": "test@gmail.com"},
+        "users/f4c8e142-5a8e-4759-9eec-74d9139dcfd5", json=data
     )
 
     json = response.json()
+    created_at = datetime.fromisoformat(json["createdAt"])
+    updated_at = datetime.fromisoformat(json["updatedAt"])
 
     assert response.status_code == HTTPStatus.OK
     assert json["id"] == "f4c8e142-5a8e-4759-9eec-74d9139dcfd5"
-    assert json["email"] == "test@gmail.com"
+    assert json["email"] == "mrbrown2@user.com"
+    assert json["verified"] is False  # Email verification should be invalidated.
     assert json["name"] == "mr_brown"
-    created_at = datetime.fromisoformat(json["createdAt"])
-    updated_at = datetime.fromisoformat(json["updatedAt"])
     assert updated_at > created_at
 
 

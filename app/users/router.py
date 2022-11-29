@@ -82,6 +82,7 @@ async def update_user(
 
     if body.email:
         document["email"] = body.email
+        document["verified"] = False
 
     if body.password:
         salt = bcrypt.gensalt()
