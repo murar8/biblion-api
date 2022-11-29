@@ -126,7 +126,7 @@ async def login_user(
     return UserResponse.from_mongo(user)
 
 
-@router.post("/verification_code", status_code=HTTPStatus.NO_CONTENT)
+@router.post("/verification-code", status_code=HTTPStatus.NO_CONTENT)
 async def request_verification_code(
     database: Database = Depends(get_db),
     config: Config = Depends(get_config),
@@ -135,8 +135,8 @@ async def request_verification_code(
     verification_code = uuid.uuid4()
 
     content = {
-        "verification_code": verification_code,
-        "verification_code_iat": datetime.now(),
+        "verificationCode": verification_code,
+        "verificationCodeIat": datetime.now(),
     }
 
     await database.users.update_one({"_id": user["_id"]}, {"$set": content})
@@ -170,21 +170,21 @@ async def verify_user(
     user=Depends(get_logged_user),
     config: Config = Depends(get_config),
 ):
-    if "verification_code" not in user or "verification_code_iat" not in user:
+    if "verificationCode" not in user or "verificationCodeIat" not in user:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail="No account verification requests found.",
         )
 
     expiration_delta = timedelta(0, config.email.verification_expiration)
-    expiration = user["verification_code_iat"] + expiration_delta
+    expiration = user["verificationCodeIat"] + expiration_delta
 
     if expiration < datetime.now():
         raise HTTPException(
             status_code=HTTPStatus.GONE, detail="Verification code has expired."
         )
 
-    if user["verification_code"] != uuid.UUID(code):
+    if user["verificationCode"] != uuid.UUID(code):
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED, detail="Verification code is invalid."
         )
@@ -193,6 +193,6 @@ async def verify_user(
         {"_id": user["_id"]},
         {
             "$set": {"verified": True},
-            "$unset": {"verification_code": "", "verification_code_iat": ""},
+            "$unset": {"verificationCode": "", "verificationCodeIat": ""},
         },
     )

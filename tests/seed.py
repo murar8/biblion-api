@@ -78,7 +78,7 @@ users_seed = [
         "verified": False,
         "createdAt": datetime(2002, 10, 22, 2, 0, 0),
         "updatedAt": datetime(2002, 11, 28, 14, 0, 0),
-        "verification_code": uuid.UUID("03d06d59-5fd5-4c49-bafe-91bab21d1391"),
-        "verification_code_iat": datetime.now(),
+        "verificationCode": uuid.UUID("03d06d59-5fd5-4c49-bafe-91bab21d1391"),
+        "verificationCodeIat": datetime.now(),
     },
 ]

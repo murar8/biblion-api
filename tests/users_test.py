@@ -138,7 +138,7 @@ async def test_login_user_non_existent(app_client: AsyncClient):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_request_verification_code(app_client: AsyncClient):
-    response = await app_client.post("users/verification_code")
+    response = await app_client.post("users/verification-code")
     assert response.status_code == HTTPStatus.NO_CONTENT
 
     messages = requests.get(
