@@ -7,7 +7,7 @@ from app.providers.config import Config, get_config
 from app.util.access_token import AccessToken
 
 
-def get_jwt(
+def get_access_token(
     config: Config = Depends(get_config),
     access_token: str = Cookie(),
 ):

@@ -8,9 +8,9 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pymongo.database import Database
 
-from app.providers.auth import get_jwt
+from app.providers.access_token import get_access_token
 from app.providers.config import get_config
-from app.providers.database import get_db
+from app.providers.database import get_database
 from app.providers.email_service import get_email_service
 from app.providers.logged_user import get_logged_user
 from app.users.request import CreateUserRequest, LoginUserRequest, UpdateUserRequest
@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.get("/{uid}", response_model=UserResponse)
-async def get_user(uid: str, database: Database = Depends(get_db)):
+async def get_user(uid: str, database: Database = Depends(get_database)):
     user = await database.users.find_one({"_id": uuid.UUID(uid)})
 
     if not user:
@@ -35,7 +35,7 @@ async def get_user(uid: str, database: Database = Depends(get_db)):
 @router.post("/", response_model=UserResponse, status_code=HTTPStatus.CREATED)
 async def create_user(
     body: CreateUserRequest,
-    database: Database = Depends(get_db),
+    database: Database = Depends(get_database),
 ):
     user = await database.users.find_one(
         {"$or": [{"email": body.email}, {"name": body.name}]}
@@ -68,8 +68,8 @@ async def create_user(
 async def update_user(
     uid: str,
     body: UpdateUserRequest,
-    jwt: AccessToken = Depends(get_jwt),
-    database: Database = Depends(get_db),
+    jwt: AccessToken = Depends(get_access_token),
+    database: Database = Depends(get_database),
 ):
     if uid != jwt.sub:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
@@ -102,7 +102,7 @@ async def update_user(
 async def login_user(
     body: LoginUserRequest,
     response: Response,
-    database: Database = Depends(get_db),
+    database: Database = Depends(get_database),
     config: Config = Depends(get_config),
 ):
     user = await database.users.find_one(
@@ -128,7 +128,7 @@ async def login_user(
 
 @router.post("/verification-code", status_code=HTTPStatus.NO_CONTENT)
 async def request_verification_code(
-    database: Database = Depends(get_db),
+    database: Database = Depends(get_database),
     config: Config = Depends(get_config),
     email_service: EmailService = Depends(get_email_service),
     user: dict = Depends(get_logged_user),
@@ -162,7 +162,7 @@ async def request_verification_code(
 @router.post("/verify/{code}", status_code=HTTPStatus.NO_CONTENT)
 async def verify_user(
     code: str,
-    database: Database = Depends(get_db),
+    database: Database = Depends(get_database),
     user=Depends(get_logged_user),
     config: Config = Depends(get_config),
 ):

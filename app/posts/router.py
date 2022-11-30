@@ -8,8 +8,8 @@ from pymongo.database import Database
 
 from app.posts.request import CreatePostRequest, GetPostsParams, UpdatePostRequest
 from app.posts.response import PaginatedResponse, PostResponse
-from app.providers.auth import get_jwt
-from app.providers.database import get_db
+from app.providers.access_token import get_access_token
+from app.providers.database import get_database
 from app.util.access_token import AccessToken
 from app.util.shortid import generate_shortid
 
@@ -17,7 +17,7 @@ router = APIRouter()
 
 
 @router.get("/{uid}", response_model=PostResponse)
-async def get_post(uid: str, database: Database = Depends(get_db)):
+async def get_post(uid: str, database: Database = Depends(get_database)):
     post = await database.posts.find_one({"_id": uid})
 
     if not post:
@@ -28,7 +28,7 @@ async def get_post(uid: str, database: Database = Depends(get_db)):
 
 @router.get("/", response_model=PaginatedResponse[PostResponse])
 async def get_posts(
-    query: GetPostsParams = Depends(), database: Database = Depends(get_db)
+    query: GetPostsParams = Depends(), database: Database = Depends(get_database)
 ):
     find = {}
 
@@ -69,8 +69,8 @@ async def get_posts(
 @router.post("/", response_model=PostResponse, status_code=HTTPStatus.CREATED)
 async def create_post(
     body: CreatePostRequest,
-    jwt: AccessToken = Depends(get_jwt),
-    database: Database = Depends(get_db),
+    jwt: AccessToken = Depends(get_access_token),
+    database: Database = Depends(get_database),
 ):
     # We use short ids to make it easy for users to share posts by id, so we
     # have to take into account the (unlikely) possibility of having two ids clashing.
@@ -98,8 +98,8 @@ async def create_post(
 async def update_post(
     uid: str,
     body: UpdatePostRequest,
-    jwt: AccessToken = Depends(get_jwt),
-    database: Database = Depends(get_db),
+    jwt: AccessToken = Depends(get_access_token),
+    database: Database = Depends(get_database),
 ):
     owner_id = uuid.UUID(jwt.sub)
 
@@ -120,8 +120,8 @@ async def update_post(
 @router.delete("/{uid}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_post(
     uid: str,
-    jwt: AccessToken = Depends(get_jwt),
-    database: Database = Depends(get_db),
+    jwt: AccessToken = Depends(get_access_token),
+    database: Database = Depends(get_database),
 ):
     post = await database.posts.find_one({"_id": uid})
 
