@@ -1,24 +1,23 @@
-from functools import reduce
-import smtplib
-from urllib.parse import urljoin
 import uuid
 from datetime import datetime, timedelta
-from email.message import EmailMessage
+from functools import reduce
 from http import HTTPStatus
+from urllib.parse import urljoin
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
-from jinja2 import Environment, FileSystemLoader
 from pymongo.database import Database
 
 from app.providers.auth import get_jwt
 from app.providers.config import get_config
 from app.providers.database import get_db
+from app.providers.email_service import get_email_service
 from app.providers.logged_user import get_logged_user
 from app.users.request import CreateUserRequest, LoginUserRequest, UpdateUserRequest
 from app.users.response import UserResponse
 from app.util.access_token import AccessToken
 from app.util.config import Config
+from app.util.email_service import EmailService
 
 router = APIRouter()
 
@@ -131,7 +130,8 @@ async def login_user(
 async def request_verification_code(
     database: Database = Depends(get_db),
     config: Config = Depends(get_config),
-    user=Depends(get_logged_user),
+    email_service: EmailService = Depends(get_email_service),
+    user: dict = Depends(get_logged_user),
 ):
     verification_code = uuid.uuid4()
 
@@ -142,26 +142,21 @@ async def request_verification_code(
 
     await database.users.update_one({"_id": user["_id"]}, {"$set": content})
 
-    environment = Environment(loader=FileSystemLoader("templates/"))
-    template = environment.get_template("email-confirmation.html")
+    template_variables = {
+        "title": "Email Confirmation",
+        "description": "Confirm Your Email Address.",
+        "base_url": config.website.base_url,
+        "confirmation_url": reduce(
+            urljoin, [config.website.base_url, "verify/", str(verification_code)]
+        ),
+    }
 
-    confirmation_url = reduce(
-        urljoin, [config.website.base_url, "verify/", str(verification_code)]
+    email_service.send_email(
+        subject="Verify your address",
+        to=user["email"],
+        template="account-action.html",
+        variables=template_variables,
     )
-
-    content = template.render(
-        base_url=config.website.base_url, confirmation_url=confirmation_url
-    )
-
-    email = EmailMessage()
-    email.set_content(content, "html")
-
-    email["Subject"] = "Verify your address"
-    email["From"] = config.email.sender
-    email["To"] = user["email"]
-
-    with smtplib.SMTP(config.email.smtp_server) as smtp:
-        smtp.send_message(email)
 
 
 @router.post("/verify/{code}", status_code=HTTPStatus.NO_CONTENT)

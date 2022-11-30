@@ -5,7 +5,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Email Confirmation</title>
+    <title>{{ title }}</title>
 
     <style type="text/css">
       /**
@@ -122,7 +122,7 @@
         opacity: 0;
       "
     >
-      Confirm Your Email Address.
+      {{ description }}
     </div>
     <!-- end preheader -->
 
@@ -162,7 +162,7 @@
                     line-height: 48px;
                   "
                 >
-                  Confirm Your Email Address
+                  {{ description }}
                 </h1>
               </td>
             </tr>
@@ -204,7 +204,7 @@
                 "
               >
                 <p style="margin: 0">
-                  Tap the button below to confirm your email address. If you
+                  Tap the button below to proceed with the request. If you
                   didn't create an account with
                   <a href="{{ base_url }}">Biblion</a>, you can safely delete
                   this email.
@@ -239,7 +239,8 @@
                                 text-decoration: none;
                                 border-radius: 6px;
                               "
-                              >Confirm
+                            >
+                              Confirm
                             </a>
                           </td>
                         </tr>
@@ -314,9 +315,9 @@
                 "
               >
                 <p style="margin: 0">
-                  You received this email because we received a request for
-                  email confirmation for your account. If you didn't request
-                  email confirmation you can safely delete this email.
+                  You received this email because we received a request for this
+                  action for your account. If you didn't request this operation
+                  you can safely delete this email.
                 </p>
               </td>
             </tr>
