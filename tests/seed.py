@@ -47,7 +47,7 @@ users_seed = [
         "_id": uuid.UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
         "email": "mrbrown@user.com",
         "name": "mr_brown",
-        "password_hash": (
+        "passwordHash": (
             # pw: "hastasiempre"
             b"$2b$12$AccWeQEg2szEkty9YCWLa.1Y2snNhc.DTmk97Qveg8hpDgm9.O2kG"
         ),
@@ -59,7 +59,7 @@ users_seed = [
         "_id": uuid.UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
         "email": "mrgreen@user.com",
         "name": "mr_green",
-        "password_hash": (
+        "passwordHash": (
             # pw: "hastanunca"
             b"$2b$12$tToXPOgFqXrqjuIdCXODZeXK0IfL.kz7sZ1/SxWRvN3Zn.TZYe7MW"
         ),
@@ -71,7 +71,7 @@ users_seed = [
         "_id": uuid.UUID("af71f215-c3f8-441f-9498-e75f8dfbcf4b"),
         "email": "mrred@user.com",
         "name": "mr_red",
-        "password_hash": (
+        "passwordHash": (
             # pw: "hastacuando"
             b"$2b$12$yp9ipcT4VdpkMmwSNTaoied19ElSKuKtjeONj.7.nb5HUZllHvMx."
         ),
@@ -80,5 +80,7 @@ users_seed = [
         "updatedAt": datetime(2002, 11, 28, 14, 0, 0),
         "verificationCode": uuid.UUID("03d06d59-5fd5-4c49-bafe-91bab21d1391"),
         "verificationCodeIat": datetime.now(),
+        "resetCode": uuid.UUID("6e94e45a-5f47-4b38-9483-6b1d5d57266b"),
+        "resetCodeIat": datetime.now(),
     },
 ]

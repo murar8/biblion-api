@@ -25,6 +25,7 @@ class EmailConfig(pydantic.BaseSettings):
     sender: EmailStr
     smtp_server: str
     verification_expiration: conint(gt=0)
+    password_reset_expiration: conint(gt=0)
 
     class Config:
         env_prefix = "EMAIL_"

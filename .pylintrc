@@ -422,6 +422,7 @@ disable=raw-checker-failed,
         missing-class-docstring,
         missing-function-docstring,
         too-few-public-methods,
+        too-many-arguments,
         fixme
 
 

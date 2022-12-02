@@ -13,7 +13,12 @@ from app.providers.config import get_config
 from app.providers.database import get_database
 from app.providers.email_service import get_email_service
 from app.providers.logged_user import get_logged_user
-from app.users.request import CreateUserRequest, LoginUserRequest, UpdateUserRequest
+from app.users.request import (
+    CreateUserRequest,
+    LoginUserRequest,
+    ResetPasswordRequest,
+    UpdateUserRequest,
+)
 from app.users.response import UserResponse
 from app.util.access_token import AccessToken
 from app.util.config import Config
@@ -83,10 +88,6 @@ async def update_user(
         document["email"] = body.email
         document["verified"] = False
 
-    if body.password:
-        salt = bcrypt.gensalt()
-        document["password_hash"] = bcrypt.hashpw(body.password.encode(), salt)
-
     result = await database.users.update_one(
         {"_id": uuid.UUID(uid)}, {"$set": document}
     )
@@ -112,7 +113,7 @@ async def login_user(
     if not user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
 
-    if not bcrypt.checkpw(body.password.encode(), user["password_hash"]):
+    if not bcrypt.checkpw(body.password.encode(), user["passwordHash"]):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
     response.set_cookie(
@@ -188,7 +189,83 @@ async def verify_user(
     await database.users.update_one(
         {"_id": user["_id"]},
         {
-            "$set": {"verified": True},
+            "$set": {"verified": True, "updatedAt": datetime.now()},
             "$unset": {"verificationCode": "", "verificationCodeIat": ""},
         },
     )
+
+
+@router.post("/password-reset", status_code=HTTPStatus.NO_CONTENT)
+async def request_password_reset(
+    database: Database = Depends(get_database),
+    config: Config = Depends(get_config),
+    email_service: EmailService = Depends(get_email_service),
+    user: dict = Depends(get_logged_user),
+):
+    reset_code = uuid.uuid4()
+
+    content = {
+        "resetCode": reset_code,
+        "resetCodeIat": datetime.now(),
+    }
+
+    await database.users.update_one({"_id": user["_id"]}, {"$set": content})
+
+    template_variables = {
+        "title": "Password Reset",
+        "description": "Reset your password.",
+        "base_url": config.website.base_url,
+        "confirmation_url": reduce(
+            urljoin, [config.website.base_url, "reset/", str(reset_code)]
+        ),
+    }
+
+    email_service.send_email(
+        subject="Password Reset",
+        to=user["email"],
+        template="account-action.html",
+        variables=template_variables,
+    )
+
+
+@router.post("/reset/{code}", status_code=HTTPStatus.NO_CONTENT)
+async def reset_password(
+    code: str,
+    body: ResetPasswordRequest,
+    response: Response,
+    database: Database = Depends(get_database),
+    user=Depends(get_logged_user),
+    config: Config = Depends(get_config),
+):
+    if "resetCode" not in user or "resetCodeIat" not in user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="No password reset requests found.",
+        )
+
+    expiration_delta = timedelta(0, config.email.password_reset_expiration)
+    expiration = user["resetCodeIat"] + expiration_delta
+
+    if expiration < datetime.now():
+        raise HTTPException(
+            status_code=HTTPStatus.GONE, detail="Reset code has expired."
+        )
+
+    if user["resetCode"] != uuid.UUID(code):
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail="Reset code is invalid."
+        )
+
+    salt = bcrypt.gensalt()
+    password_hash = bcrypt.hashpw(body.password.encode(), salt)
+    updated_at = datetime.now()
+
+    await database.users.update_one(
+        {"_id": user["_id"]},
+        {
+            "$set": {"passwordHash": password_hash, "updatedAt": updated_at},
+            "$unset": {"resetCode": "", "resetCodeIat": ""},
+        },
+    )
+
+    response.delete_cookie(key="access_token")

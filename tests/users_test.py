@@ -170,3 +170,66 @@ async def test_verify_user_no_request_found(app_client: AsyncClient):
         "users/verify/060ac1bf-4377-4075-b83a-322c0f3f3dfd"
     )
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+async def test_request_password_reset(app_client: AsyncClient):
+    response = await app_client.post("users/password-reset")
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+    messages = requests.get(
+        f"{os.environ['MAILHOG_API_URL']}/api/v2/messages", timeout=1000
+    )
+
+    headers = messages.json()["items"][0]["Content"]["Headers"]
+
+    assert headers["From"][0] == "verification@biblion.com"
+    assert headers["To"][0] == "mrbrown@user.com"
+    assert headers["Subject"][0] == "Password Reset"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_red"}], indirect=True)
+async def test_reset_password(app_client: AsyncClient):
+    data = {"password": "hastanoche"}
+    response = await app_client.post(
+        "users/reset/6e94e45a-5f47-4b38-9483-6b1d5d57266b", json=data
+    )
+
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+    # Reset code should only be valid for a single operation.
+
+    response = await app_client.post(
+        "users/reset/6e94e45a-5f47-4b38-9483-6b1d5d57266b", json=data
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+    # User should not be able to keep using the same token.
+
+    response = await app_client.patch(
+        "users/34b8028f-a220-498e-85c9-7304e44cb272", json={"email": "test@gmail.com"}
+    )
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    # User should be able to login using the new password.
+
+    response = await app_client.post(
+        "users/login", json={"name": "mr_red", "password": "hastanoche"}
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+async def test_reset_password_no_request_found(app_client: AsyncClient):
+    data = {"password": "hastanoche"}
+    response = await app_client.post(
+        "users/reset/fc677ae6-6e43-4b7e-b53c-bb4fe98bff29", json=data
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND

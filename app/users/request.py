@@ -1,18 +1,17 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, root_validator
+from pydantic import BaseModel, EmailStr, constr, root_validator
 
 
 class CreateUserRequest(BaseModel):
     email: EmailStr
     name: Optional[str]
-    password: str = Field(min_length=1)
+    password: constr(min_length=1)
 
 
 class UpdateUserRequest(BaseModel):
     email: Optional[EmailStr]
     name: Optional[str]
-    password: Optional[str] = Field(min_length=1)
 
 
 class LoginUserRequest(BaseModel):
@@ -30,3 +29,7 @@ class LoginUserRequest(BaseModel):
             raise ValueError("Either user email or name must be supplied.")
 
         return values
+
+
+class ResetPasswordRequest(BaseModel):
+    password: constr(min_length=1)
