@@ -130,6 +130,17 @@ async def login_user(
     return UserResponse.from_mongo(user)
 
 
+@router.post("/logout", status_code=HTTPStatus.NO_CONTENT)
+async def logout_user(response: Response):
+    response.set_cookie(
+        key="access_token",
+        value=None,
+        secure=True,
+        httponly=True,
+        expires=datetime.now(),
+    )
+
+
 @router.post("/verify", status_code=HTTPStatus.NO_CONTENT)
 async def request_email_verification(
     database: Database = Depends(get_database),
@@ -271,4 +282,10 @@ async def reset_password(
         },
     )
 
-    response.delete_cookie(key="access_token")
+    response.set_cookie(
+        key="access_token",
+        value=None,
+        secure=True,
+        httponly=True,
+        expires=datetime.now(),
+    )

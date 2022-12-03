@@ -149,6 +149,16 @@ async def test_login_user_non_existent(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+async def test_logout_user(app_client: AsyncClient):
+    response = await app_client.post("users/logout")
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+    response = await app_client.get("users/me")
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_request_verification_code(app_client: AsyncClient):
     response = await app_client.post("users/verify")
     assert response.status_code == HTTPStatus.NO_CONTENT
@@ -212,23 +222,11 @@ async def test_reset_password(app_client: AsyncClient):
     response = await app_client.post(
         "users/password-reset/6e94e45a-5f47-4b38-9483-6b1d5d57266b", json=data
     )
-
     assert response.status_code == HTTPStatus.NO_CONTENT
-
-    # Reset code should only be valid for a single operation.
-
-    response = await app_client.post(
-        "users/password-reset/6e94e45a-5f47-4b38-9483-6b1d5d57266b", json=data
-    )
-
-    assert response.status_code == HTTPStatus.NOT_FOUND
 
     # User should not be able to keep using the same token.
 
-    response = await app_client.patch(
-        "users/34b8028f-a220-498e-85c9-7304e44cb272", json={"email": "test@gmail.com"}
-    )
-
+    response = await app_client.get("users/me")
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     # User should be able to login using the new password.
@@ -236,8 +234,14 @@ async def test_reset_password(app_client: AsyncClient):
     response = await app_client.post(
         "users/login", json={"name": "mr_red", "password": "hastanoche"}
     )
-
     assert response.status_code == HTTPStatus.OK
+
+    # Reset code should only be valid for a single operation.
+
+    response = await app_client.post(
+        "users/password-reset/6e94e45a-5f47-4b38-9483-6b1d5d57266b", json=data
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.asyncio
