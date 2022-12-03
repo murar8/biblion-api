@@ -9,7 +9,7 @@ from app.util.access_token import AccessToken
 
 def get_access_token(
     config: Config = Depends(get_config),
-    access_token: str = Cookie(),
+    access_token: str = Cookie(include_in_schema=False),
 ):
     try:
         return AccessToken.decode(access_token, config.jwt)

@@ -27,6 +27,11 @@ from app.util.email_service import EmailService
 router = APIRouter()
 
 
+@router.get("/me", response_model=UserResponse)
+async def get_current_user(user: dict = Depends(get_logged_user)):
+    return UserResponse.from_mongo(user)
+
+
 @router.get("/{uid}", response_model=UserResponse)
 async def get_user(uid: str, database: Database = Depends(get_database)):
     user = await database.users.find_one({"_id": uuid.UUID(uid)})

@@ -23,6 +23,16 @@ async def test_get_user_non_existent(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+async def test_get_current_user(app_client: AsyncClient):
+    response = await app_client.get("users/me")
+    json = response.json()
+
+    assert response.status_code == HTTPStatus.OK
+    assert json["id"] == "f4c8e142-5a8e-4759-9eec-74d9139dcfd5"
+
+
+@pytest.mark.asyncio
 async def test_create_user(app_client: AsyncClient):
     body = {"email": "test@gmail.com", "name": "mr_bean", "password": "banana"}
     response = await app_client.post("users", json=body)
