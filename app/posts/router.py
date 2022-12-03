@@ -83,7 +83,7 @@ async def create_post(
         created_at = datetime.utcnow()
         document = {
             "_id": uid,
-            "ownerId": jwt.sub,
+            "ownerId": uuid.UUID(jwt.sub),
             "createdAt": created_at,
             "updatedAt": created_at,
             **body.dict(),
