@@ -127,7 +127,7 @@ async def login_user(
     return UserResponse.from_mongo(user)
 
 
-@router.post("/verification-code", status_code=HTTPStatus.NO_CONTENT)
+@router.post("/verify", status_code=HTTPStatus.NO_CONTENT)
 async def request_verification_code(
     database: Database = Depends(get_database),
     config: Config = Depends(get_config),
@@ -228,7 +228,7 @@ async def request_password_reset(
     )
 
 
-@router.post("/reset/{code}", status_code=HTTPStatus.NO_CONTENT)
+@router.post("/password-reset/{code}", status_code=HTTPStatus.NO_CONTENT)
 async def reset_password(
     code: str,
     body: ResetPasswordRequest,
