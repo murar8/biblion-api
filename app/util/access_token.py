@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import time
+import uuid
+from datetime import datetime
 
 import jwt
 from pydantic import BaseModel
@@ -11,13 +13,13 @@ from app.util.config import JwtConfig
 
 class AccessToken(BaseModel):
     iss: str
-    sub: str
+    sub: uuid.UUID
     aud: str
-    iat: int
-    exp: int
+    iat: datetime
+    exp: datetime
 
     @staticmethod
-    def encode(sub: str, config: JwtConfig) -> str:
+    def encode(sub: uuid.UUID, config: JwtConfig) -> str:
         iat = time.time()
         exp = iat + config.expiration
 
@@ -26,7 +28,7 @@ class AccessToken(BaseModel):
             algorithm=config.algorithm,
             payload={
                 "iss": config.issuer,
-                "sub": sub,
+                "sub": str(sub),
                 "aud": config.audience,
                 "iat": iat,
                 "exp": exp,

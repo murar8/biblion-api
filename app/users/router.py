@@ -28,13 +28,13 @@ router = APIRouter()
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user(user: dict = Depends(get_logged_user)):
+async def get_current_user(user: dict[str, any] = Depends(get_logged_user)):
     return UserResponse.from_mongo(user)
 
 
-@router.get("/{uid}", response_model=UserResponse)
-async def get_user(uid: str, database: Database = Depends(get_database)):
-    user = await database.users.find_one({"_id": uuid.UUID(uid)})
+@router.get("/{user_id}", response_model=UserResponse)
+async def get_user(user_id: uuid.UUID, database: Database = Depends(get_database)):
+    user = await database.users.find_one({"_id": user_id})
 
     if not user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
@@ -74,14 +74,14 @@ async def create_user(
     return UserResponse.from_mongo(user)
 
 
-@router.patch("/{uid}", response_model=UserResponse)
+@router.patch("/{user_id}", response_model=UserResponse)
 async def update_user(
-    uid: str,
+    user_id: uuid.UUID,
     body: UpdateUserRequest,
     jwt: AccessToken = Depends(get_access_token),
     database: Database = Depends(get_database),
 ):
-    if uid != jwt.sub:
+    if user_id != jwt.sub:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
     document = {"updatedAt": datetime.utcnow()}
@@ -93,14 +93,12 @@ async def update_user(
         document["email"] = body.email
         document["verified"] = False
 
-    result = await database.users.update_one(
-        {"_id": uuid.UUID(uid)}, {"$set": document}
-    )
+    result = await database.users.update_one({"_id": user_id}, {"$set": document})
 
     if not result.matched_count:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
 
-    user = await database.users.find_one({"_id": uuid.UUID(uid)})
+    user = await database.users.find_one({"_id": user_id})
     return UserResponse.from_mongo(user)
 
 
@@ -123,7 +121,7 @@ async def login_user(
 
     response.set_cookie(
         key="access_token",
-        value=AccessToken.encode(str(user["_id"]), config.jwt),
+        value=AccessToken.encode(user["_id"], config.jwt),
         secure=True,
         httponly=True,
         max_age=config.jwt.expiration,
@@ -133,11 +131,11 @@ async def login_user(
 
 
 @router.post("/verify", status_code=HTTPStatus.NO_CONTENT)
-async def request_verification_code(
+async def request_email_verification(
     database: Database = Depends(get_database),
     config: Config = Depends(get_config),
     email_service: EmailService = Depends(get_email_service),
-    user: dict = Depends(get_logged_user),
+    user: dict[str, any] = Depends(get_logged_user),
 ):
     verification_code = uuid.uuid4()
 
@@ -167,9 +165,9 @@ async def request_verification_code(
 
 @router.post("/verify/{code}", status_code=HTTPStatus.NO_CONTENT)
 async def verify_user(
-    code: str,
+    code: uuid.UUID,
     database: Database = Depends(get_database),
-    user=Depends(get_logged_user),
+    user: dict[str, any] = Depends(get_logged_user),
     config: Config = Depends(get_config),
 ):
     if "verificationCode" not in user or "verificationCodeIat" not in user:
@@ -186,7 +184,7 @@ async def verify_user(
             status_code=HTTPStatus.GONE, detail="Verification code has expired."
         )
 
-    if user["verificationCode"] != uuid.UUID(code):
+    if user["verificationCode"] != code:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED, detail="Verification code is invalid."
         )
@@ -205,7 +203,7 @@ async def request_password_reset(
     database: Database = Depends(get_database),
     config: Config = Depends(get_config),
     email_service: EmailService = Depends(get_email_service),
-    user: dict = Depends(get_logged_user),
+    user: dict[str, any] = Depends(get_logged_user),
 ):
     reset_code = uuid.uuid4()
 
@@ -235,11 +233,11 @@ async def request_password_reset(
 
 @router.post("/password-reset/{code}", status_code=HTTPStatus.NO_CONTENT)
 async def reset_password(
-    code: str,
+    code: uuid.UUID,
     body: ResetPasswordRequest,
     response: Response,
     database: Database = Depends(get_database),
-    user=Depends(get_logged_user),
+    user: dict[str, any] = Depends(get_logged_user),
     config: Config = Depends(get_config),
 ):
     if "resetCode" not in user or "resetCodeIat" not in user:
@@ -256,7 +254,7 @@ async def reset_password(
             status_code=HTTPStatus.GONE, detail="Reset code has expired."
         )
 
-    if user["resetCode"] != uuid.UUID(code):
+    if user["resetCode"] != code:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED, detail="Reset code is invalid."
         )

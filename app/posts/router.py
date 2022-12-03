@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 from http import HTTPStatus
 
@@ -16,9 +15,9 @@ from app.util.shortid import generate_shortid
 router = APIRouter()
 
 
-@router.get("/{uid}", response_model=PostResponse)
-async def get_post(uid: str, database: Database = Depends(get_database)):
-    post = await database.posts.find_one({"_id": uid})
+@router.get("/{post_id}", response_model=PostResponse)
+async def get_post(post_id: str, database: Database = Depends(get_database)):
+    post = await database.posts.find_one({"_id": post_id})
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
@@ -83,7 +82,7 @@ async def create_post(
         created_at = datetime.utcnow()
         document = {
             "_id": uid,
-            "ownerId": uuid.UUID(jwt.sub),
+            "ownerId": jwt.sub,
             "createdAt": created_at,
             "updatedAt": created_at,
             **body.dict(),
@@ -94,41 +93,39 @@ async def create_post(
         return PostResponse.from_mongo(post)
 
 
-@router.patch("/{uid}", response_model=PostResponse)
+@router.patch("/{post_id}", response_model=PostResponse)
 async def update_post(
-    uid: str,
+    post_id: str,
     body: UpdatePostRequest,
     jwt: AccessToken = Depends(get_access_token),
     database: Database = Depends(get_database),
 ):
-    owner_id = uuid.UUID(jwt.sub)
-
-    where = {"_id": uid, "ownerId": owner_id}
+    where = {"_id": post_id, "ownerId": jwt.sub}
     update = {"$set": {**body.dict(exclude_unset=True), "updatedAt": datetime.utcnow()}}
     await database.posts.update_one(where, update)
-    post = await database.posts.find_one({"_id": uid})
+    post = await database.posts.find_one({"_id": post_id})
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
 
-    if post["ownerId"] != owner_id:
+    if post["ownerId"] != jwt.sub:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
     return PostResponse.from_mongo(post)
 
 
-@router.delete("/{uid}", status_code=HTTPStatus.NO_CONTENT)
+@router.delete("/{post_id}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_post(
-    uid: str,
+    post_id: str,
     jwt: AccessToken = Depends(get_access_token),
     database: Database = Depends(get_database),
 ):
-    post = await database.posts.find_one({"_id": uid})
+    post = await database.posts.find_one({"_id": post_id})
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
 
-    if post["ownerId"] != uuid.UUID(jwt.sub):
+    if post["ownerId"] != jwt.sub:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
-    await database.posts.delete_one({"_id": uid})
+    await database.posts.delete_one({"_id": post_id})

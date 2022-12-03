@@ -1,4 +1,3 @@
-import uuid
 from http import HTTPStatus
 
 from fastapi import Depends, HTTPException
@@ -13,8 +12,7 @@ async def get_logged_user(
     jwt: AccessToken = Depends(get_access_token),
     database: Database = Depends(get_database),
 ):
-    uid = uuid.UUID(jwt.sub)
-    user = await database.users.find_one({"_id": uid})
+    user = await database.users.find_one({"_id": jwt.sub})
 
     if not user:
         raise HTTPException(
