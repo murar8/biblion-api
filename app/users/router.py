@@ -47,12 +47,17 @@ async def create_user(
     body: CreateUserRequest,
     database: Database = Depends(get_database),
 ):
-    user = await database.users.find_one(
-        {"$or": [{"email": body.email}, {"name": body.name}]}
-    )
+    find = [{"email": body.email}]
+
+    if body.name:
+        find.append({"name": body.name})
+
+    user = await database.users.find_one({"$or": find})
 
     if user:
-        raise HTTPException(status_code=HTTPStatus.CONFLICT)
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT, detail="User already exists."
+        )
 
     created_at = datetime.utcnow()
     salt = bcrypt.gensalt()
@@ -61,12 +66,14 @@ async def create_user(
     document = {
         "_id": uuid.uuid4(),
         "email": body.email,
-        "name": body.name,
         "passwordHash": password_hash,
         "verified": False,
         "createdAt": created_at,
         "updatedAt": created_at,
     }
+
+    if body.name:
+        document["name"] = body.name
 
     res = await database.users.insert_one(document=document)
     user = await database.users.find_one({"_id": res.inserted_id})
@@ -84,16 +91,22 @@ async def update_user(
     if user_id != jwt.sub:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
-    document = {"updatedAt": datetime.utcnow()}
+    to_set = {"updatedAt": datetime.utcnow()}
+    to_unset = {}
 
     if body.name:
-        document["name"] = body.name
+        to_set["name"] = body.name
+
+    if body.name == "":
+        to_unset["name"] = ""
 
     if body.email:
-        document["email"] = body.email
-        document["verified"] = False
+        to_set["email"] = body.email
+        to_set["verified"] = False
 
-    result = await database.users.update_one({"_id": user_id}, {"$set": document})
+    result = await database.users.update_one(
+        {"_id": user_id}, {"$set": to_set, "$unset": to_unset}
+    )
 
     if not result.matched_count:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
@@ -109,9 +122,12 @@ async def login_user(
     database: Database = Depends(get_database),
     config: Config = Depends(get_config),
 ):
-    user = await database.users.find_one(
-        {"$or": [{"email": body.email}, {"name": body.name}]}
-    )
+    find = [{"email": body.email}]
+
+    if body.name:
+        find.append({"name": body.name})
+
+    user = await database.users.find_one({"$or": find})
 
     if not user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
