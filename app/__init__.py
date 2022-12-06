@@ -20,9 +20,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: only allow production origin
+    allow_origins=["http://localhost:5173"],  # TODO: add production origin
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
 app.include_router(posts_router, prefix="/posts", tags=["posts"])
