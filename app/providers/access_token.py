@@ -9,7 +9,7 @@ from app.util.access_token import AccessToken
 
 def get_access_token(
     config: Config = Depends(get_config),
-    access_token: str | None = Cookie(include_in_schema=False),
+    access_token: str | None = Cookie(default=None),
 ):
     if access_token is None:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="No JWT found.")
