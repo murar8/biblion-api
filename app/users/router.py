@@ -62,7 +62,7 @@ async def create_user(
         "_id": uuid.uuid4(),
         "email": body.email,
         "name": body.name,
-        "password_hash": password_hash,
+        "passwordHash": password_hash,
         "verified": False,
         "createdAt": created_at,
         "updatedAt": created_at,
