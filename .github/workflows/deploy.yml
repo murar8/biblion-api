@@ -16,9 +16,8 @@ jobs:
         uses: actions/setup-python@v4
         with: { python-version: "3.10" }
 
-      # We need to install wrapt manually to be able to run pylint.
       - name: Install pipenv
-        run: pip install pipenv wrapt
+        run: pip install pipenv wrapt # We need to install wrapt manually to be able to run pylint.
 
       - name: Install dependencies
         run: pipenv install --deploy --ignore-pipfile --dev
@@ -63,3 +62,15 @@ jobs:
           labels: ${{ steps.extract-docker-meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Login
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: ${{ secrets.GCLOUD_WORKLOAD_IDP }}
+          service_account: ${{ secrets.GCLOUD_SERVICE_ACCOUNT }}
+
+      # - name: Deploy
+      #   uses: "google-github-actions/deploy-cloudrun@v1"
+      #   with:
+      #     service: "hello-cloud-run"
+      #     image: "gcr.io/cloudrun/hello"
