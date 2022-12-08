@@ -8,6 +8,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    # Necessary for Google Cloud login to work correctly.
+    permissions:
+      contents: "read"
+      id-token: "write"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -63,7 +69,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Login
+      - name: Login to Google Cloud
         uses: "google-github-actions/auth@v1"
         with:
           workload_identity_provider: ${{ secrets.GCLOUD_WORKLOAD_IDP }}
