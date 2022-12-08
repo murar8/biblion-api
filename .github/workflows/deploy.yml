@@ -10,9 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     # Necessary for Google Cloud login to work correctly.
-    permissions:
-      contents: "read"
-      id-token: "write"
+    # IMPROVEMENT: Only add the necessary permissions for the deployment.
+    # See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+    # See https://github.com/google-github-actions/auth#authenticating-via-workload-identity-federation
+    permissions: write-all
 
     steps:
       - name: Checkout
@@ -49,7 +50,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: extract-docker-meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
@@ -74,9 +75,3 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCLOUD_WORKLOAD_IDP }}
           service_account: ${{ secrets.GCLOUD_SERVICE_ACCOUNT }}
-
-      # - name: Deploy
-      #   uses: "google-github-actions/deploy-cloudrun@v1"
-      #   with:
-      #     service: "hello-cloud-run"
-      #     image: "gcr.io/cloudrun/hello"
