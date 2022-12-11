@@ -57,15 +57,12 @@ After all checks pass the PR can be merged.
 
 ### Deployment to production
 
-When a new git tag is pushed (e.g. `v1.2.3`):
+When a the code is pushed to the `main` branch the following actions will be taken:
 
+- All checks will run again to make sure the merge didn't break any code.
 - Changes to the infrastructure will be deployed using Terraform.
-
-- An image with the corresponding version tags (e.g. `v1` and `1.2.3`) will be deployed to the Artifact Registry.
-
+- An image with the corresponding version tags will be deployed to the Artifact Registry.
 - The Cloud Run instance will be updated with the new image.
-
-Please make sure to honor the SemVer specification when performing a version bump (refer to [https://semver.org/]()).
 
 #### First deployment note
 
