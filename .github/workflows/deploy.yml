@@ -30,6 +30,9 @@ jobs:
         uses: "hashicorp/setup-terraform@v2"
         with: { cli_config_credentials_token: "${{ secrets.TF_API_TOKEN }}" }
 
+      - name: Init
+        run: terraform init -input=false
+
       - name: Apply
         run: terraform apply -input=false -auto-approve -var "github_repo=${{ github.repository }}"
 
