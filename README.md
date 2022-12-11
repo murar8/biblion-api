@@ -6,6 +6,10 @@
 
 This project contains the backend functionality for the biblion project, a simple pastebin-like file upload service.
 
+The OpenAPI spec is available at https://biblion-service-ta6whx52wq-ey.a.run.app/openapi.json
+
+Swagger documentation for the API is available at https://biblion-service-ta6whx52wq-ey.a.run.app/docs
+
 ## Tech stack
 
 |                        |                                          |
@@ -18,11 +22,11 @@ This project contains the backend functionality for the biblion project, a simpl
 
 - Full integration test suite.
 - Automated quality control and deployment using GitHub Actions.
-- Infrastructure as code following the [GitOps](https://www.gitops.tech/) approach.
+- Automated infrastructure deployment following the [GitOps](https://www.gitops.tech/) approach.
 
 ## Local development
 
-The easiest way to run the project locally is to open the repository inside the preconfigured development container featuring all the necessary dependencies. For more information visit [https://code.visualstudio.com/docs/devcontainers/containers](). Alternatively you will need to manually set up a MongoDB instance and a local Mailhog server to be used for development and testing.
+The easiest way to run the project locally is to open the repository inside the preconfigured development container featuring all the necessary dependencies. For more information visit [https://code.visualstudio.com/docs/devcontainers/containers](). Alternatively you will need to manually set up a MongoDB instance and a local MailHog server to be used for development and testing.
 
 It is recommended to run `pipenv run pre-commit-install` after cloning the repository, this will add a pre-commit check to make sure the contributed code follows the project guidelines without waiting for the CI check.
 
@@ -43,7 +47,7 @@ All the production infrastruture is managed using [Terraform](https://www.terraf
 
 ## Deployment
 
-### Merging the code
+### CI/CD
 
 Direct push to the `main` branch is not allowed, any updates to the production environment require a pull request to be opened.
 
@@ -53,25 +57,25 @@ When a PR for the `main` branch is opened or updated the following checks will r
 - The code will be checked for linting or formatting issues.
 - The integration test suite will run.
 
-After all checks pass the PR can be merged.
+After all checks pass the PR will be eligible for merge.
 
 ### Deployment to production
 
-When a the code is pushed to the `main` branch the following actions will be taken:
+When the code is pushed to the `main` branch the following actions will be taken:
 
 - All checks will run again to make sure the merge didn't break any code.
 - Changes to the infrastructure will be deployed using Terraform.
-- An image with the corresponding version tags will be deployed to the Artifact Registry.
+- An image tagged with the commit SHA and branch name will be deployed to Artifact Registry.
 - The Cloud Run instance will be updated with the new image.
 
 #### First deployment note
 
 To deploy the whole infrastructure from scratch the following manual steps are necessary:
 
-- Create a new Google Cloud Platform project
+- Create a new Google Cloud Platform project.
 - Update the Terraform Cloud variables (`gcloud_project` and `gcloud_region`) to refer to the new project.
 - Create a service account with the necessary permissions for Terraform Cloud.
-- Create and export a JSON credentials key and update the Terraform Cloud variable(`GOOGLE_CREDENTIALS`) to refer to the new service account. Please note the exported key must be minified into a single line before setting it.
+- Create and export the service account credentials in JSON format and update the Terraform Cloud variable(`GOOGLE_CREDENTIALS`) to refer to the new service account. **Please note the exported key must be minified into a single line**.
 
 ## License
 
