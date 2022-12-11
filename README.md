@@ -16,23 +16,63 @@ This project contains the backend functionality for the biblion project, a simpl
 
 ## Features
 
-- Full integration test suite
-- Automated deployment as a Docker container to the GitHub registry using GitHub Actions
+- Full integration test suite.
+- Automated quality control and deployment using GitHub Actions.
+- Infrastructure as code following the [GitOps](https://www.gitops.tech/) approach.
 
 ## Local development
 
-The easiest way to run the project locally is to open the repository inside the preconfigured development container featuring all the necessary dependencies. For more information visit [https://code.visualstudio.com/docs/devcontainers/containers](). Alternatively you will need to manually set up a MongoDB instance to be used for development and testing.
+The easiest way to run the project locally is to open the repository inside the preconfigured development container featuring all the necessary dependencies. For more information visit [https://code.visualstudio.com/docs/devcontainers/containers](). Alternatively you will need to manually set up a MongoDB instance and a local Mailhog server to be used for development and testing.
 
 It is recommended to run `pipenv run pre-commit-install` after cloning the repository, this will add a pre-commit check to make sure the contributed code follows the project guidelines without waiting for the CI check.
 
 - Start a development server: `pipenv run serve`
 - Run the integration test suite: `pipenv run test`
 
-## Deploying to production
+## Production infrastructure
 
-Deployment is handled automatically using a CI pipeline every time the code is pushed.
+- Database is hosted on [MongoDB Atlas](https://www.mongodb.com/atlas/database).
 
-- When a semantic version git tag is pushed (e.g. `v1.2.3`) an image with the corresponding version tags is deployed (e.g. `v1` and `1.2.3`). Please make sure to honor the SemVer specification when performing a version bump (refer to [https://semver.org/]()).
+- SMTP service is hosted on [MailJet](https://www.mailjet.com).
+
+- Backend infrastructure is hosted on [Google Cloud Platform](https://cloud.google.com)
+  - Container images are stored on [Artifact Registry](https://cloud.google.com/artifact-registry)
+  - The production environment consists of multiple instances of the application that are scaled automatically based on the load using [Cloud Run](https://cloud.google.com/run).
+
+All the production infrastruture is managed using [Terraform](https://www.terraform.io/). Environment variables and secrets can be updated on [Terraform Cloud](https://cloud.hashicorp.com/products/terraform)
+
+## Deployment
+
+Deployment is handled automatically using a CI pipeline every time the code is pushed. Direct push to the `main` branch is not allowed, any updates to the production environment require a pull request to be opened.
+
+When a PR for the `main` branch is opened or updated the following checks will run:
+
+- Changes to the infrastructure will be validated by Terraform.
+- The code will be checked for linting or formatting issues.
+- The integration test suite will run.
+
+After all checks pass the PR can be merged.
+
+## Deployment to production
+
+When a new git tag is pushed (e.g. `v1.2.3`):
+
+- Changes to the infrastructure will be deployed using Terraform.
+
+- An image with the corresponding version tags (e.g. `v1` and `1.2.3`) will be deployed to the Artifact Registry.
+
+- The Cloud Run instance will be updated with the new image.
+
+Please make sure to honor the SemVer specification when performing a version bump (refer to [https://semver.org/]()).
+
+### First deployment
+
+To deploy the whole infrastructure from scratch the following manual steps are necessary:
+
+- Create a new Google Cloud Platform project
+- Update the Terraform Cloud variables (`gcloud_project` and `gcloud_region`) to refer to the new project.
+- Create a service account with the necessary permissions for Terraform Cloud.
+- Create and export a JSON credentials key and update the Terraform Cloud variable(`GOOGLE_CREDENTIALS`) to refer to the new service account. Please note the exported key must be minified into a single line before setting it.
 
 ## License
 
