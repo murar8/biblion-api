@@ -52,16 +52,16 @@ jobs:
           file: Dockerfile.ci
           context: "."
           tags: "biblion-ci:latest"
-          cache-from: type=gha,scope=${{ github.ref }}
-          cache-to: type=gha,scope=${{ github.ref }},mode=max
+          cache-from: type=gha,scope=${{ github.ref }}-${{ github.workflow }}-${{ github.job }}
+          cache-to: type=gha,scope=${{ github.ref }}-${{ github.workflow }}-${{ github.job }},mode=max
 
       - name: Start Background Services
         run: docker compose -f 'docker-compose.base.yml' up --detach
 
-      - name: Format
+      - name: Lint
         run: "docker run biblion-ci:latest pipenv run lint"
 
-      - name: Lint
+      - name: Format
         run: "docker run biblion-ci:latest pipenv run black --check ."
 
       - name: Test

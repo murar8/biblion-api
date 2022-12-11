@@ -38,7 +38,7 @@ jobs:
       - name: Apply
         run: terraform apply -input=false -auto-approve -var "github_repo=${{ github.repository }}"
 
-      - name: Output
+      - name: Retrieve Outputs
         id: output
         run: terraform output -json
 
@@ -92,8 +92,8 @@ jobs:
           build-args: "VERSION=${{ steps.docker-metadata.outputs.version }}"
           labels: "${{ steps.docker-metadata.outputs.labels }}"
           tags: "${{ steps.docker-metadata.outputs.tags }}"
-          cache-from: type=gha,scope=${{ github.ref }}
-          cache-to: type=gha,scope=${{ github.ref }},mode=max
+          cache-from: type=gha,scope=${{ github.ref }}-${{ github.workflow }}-${{ github.job }}
+          cache-to: type=gha,scope=${{ github.ref }}-${{ github.workflow }}-${{ github.job }},mode=max
 
       - name: Deploy to Cloud Run
         uses: "google-github-actions/deploy-cloudrun@v1"
