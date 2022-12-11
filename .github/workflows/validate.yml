@@ -1,7 +1,10 @@
 name: Validate
 
 on:
-  pull_request: { branches: ["main"] }
+  # NOTE: Make sure this workflow is not able to perform destructive operations as
+  # this target has full write permission to the repository and access to secrets.
+  # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests
+  pull_request_target: { branches: ["main"] }
   push: { branches: ["main"] }
 
 jobs:
