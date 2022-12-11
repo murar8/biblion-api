@@ -1,6 +1,6 @@
 # biblion-api
 
-[![](https://github.com/murar8/biblion-api/actions/workflows/deploy.yml/badge.svg)](https://github.com/murar8/biblion-api/actions/workflows/deploy.yml)
+[![Deploy](https://github.com/murar8/biblion-api/actions/workflows/deploy.yml/badge.svg)](https://github.com/murar8/biblion-api/actions/workflows/deploy.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
 
