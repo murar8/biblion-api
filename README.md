@@ -77,6 +77,12 @@ To deploy the whole infrastructure from scratch the following manual steps are n
 - Create a service account with the necessary permissions for Terraform Cloud.
 - Create and export the service account credentials in JSON format and update the Terraform Cloud variable(`GOOGLE_CREDENTIALS`) to refer to the new service account. **Please note the exported key must be minified into a single line**.
 
+## Improvements
+
+- Set up a staging environment.
+- Create a temporary deployment of the API when a PR is opened.
+- Test newly deployed images before routing traffic to the new instance.
+
 ## License
 
 Copyright (c) 2022 Lorenzo Murarotto <lnzmrr@gmail.com>
