@@ -2,6 +2,7 @@ name: Validate
 
 on:
   pull_request: { branches: ["main"] }
+  push: { branches: ["main"] }
 
 jobs:
   validate_infrastructure:
@@ -51,8 +52,8 @@ jobs:
           file: Dockerfile.ci
           context: "."
           tags: "biblion-ci:latest"
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ github.ref }}
+          cache-to: type=gha,scope=${{ github.ref }},mode=max
 
       - name: Start Background Services
         run: docker compose -f 'docker-compose.base.yml' up --detach

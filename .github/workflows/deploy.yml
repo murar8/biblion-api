@@ -1,8 +1,10 @@
 name: Deploy
 
 on:
-  push:
-    tags: ["v*.*.*"]
+  workflow_run:
+    workflows: ["Validate"]
+    types: ["completed"]
+    branches: ["main"]
 
 jobs:
   deploy_infrastructure:
@@ -79,9 +81,8 @@ jobs:
         with:
           images: "${{ needs.deploy_infrastructure.outputs.gcloud_repository }}/biblion-api"
           tags: |
-            type=sha,format=long,prefix=
-            type=semver,pattern={{version}}
-            type=semver,pattern=v{{major}}
+            type=ref,event=branch
+            type=sha
 
       - name: Build and Push
         uses: "docker/build-push-action@v3"
@@ -91,8 +92,8 @@ jobs:
           build-args: "VERSION=${{ steps.docker-metadata.outputs.version }}"
           labels: "${{ steps.docker-metadata.outputs.labels }}"
           tags: "${{ steps.docker-metadata.outputs.tags }}"
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ github.ref }}
+          cache-to: type=gha,scope=${{ github.ref }},mode=max
 
       - name: Deploy to Cloud Run
         uses: "google-github-actions/deploy-cloudrun@v1"
