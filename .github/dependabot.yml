@@ -9,7 +9,7 @@ updates:
     schedule: { interval: "daily" }
 
   - package-ecosystem: "terraform"
-    directory: "/"
+    directory: "/terraform"
     schedule: { interval: "daily" }
 
   - package-ecosystem: "pip"
