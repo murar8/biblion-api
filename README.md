@@ -32,7 +32,6 @@ It is recommended to run `pipenv run pre-commit-install` after cloning the repos
 
 Deployment is handled automatically using a CI pipeline every time the code is pushed.
 
-- When the code is pushed to the `main` branch an image with the `edge` tag is deployed.
 - When a semantic version git tag is pushed (e.g. `v1.2.3`) an image with the corresponding version tags is deployed (e.g. `v1` and `1.2.3`). Please make sure to honor the SemVer specification when performing a version bump (refer to [https://semver.org/]()).
 
 ## License
