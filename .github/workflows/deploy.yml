@@ -82,14 +82,14 @@ jobs:
           images: "${{ needs.deploy_infrastructure.outputs.gcloud_repository }}/biblion-api"
           tags: |
             type=ref,event=branch
-            type=sha
+            type=sha,format=long
 
       - name: Build and Push
         uses: "docker/build-push-action@v3"
         with:
           push: true
           context: "."
-          build-args: "VERSION=${{ steps.docker-metadata.outputs.version }}"
+          build-args: "VERSION=${{ github.sha }}"
           labels: "${{ steps.docker-metadata.outputs.labels }}"
           tags: "${{ steps.docker-metadata.outputs.tags }}"
           cache-from: type=gha,scope=${{ github.ref }}-${{ github.workflow }}-${{ github.job }}
