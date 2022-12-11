@@ -1,0 +1,67 @@
+name: Validate
+
+on:
+  pull_request: { branches: ["main"] }
+
+jobs:
+  validate_infrastructure:
+    runs-on: ubuntu-latest
+
+    defaults: { run: { working-directory: terraform } }
+
+    env:
+      TF_IN_AUTOMATION: "1"
+      TF_CLI_ARGS: "-no-color"
+
+    steps:
+      - name: Checkout
+        uses: "actions/checkout@v3"
+
+      - name: Setup Terraform
+        uses: "hashicorp/setup-terraform@v2"
+        with: { cli_config_credentials_token: "${{ secrets.TF_API_TOKEN }}" }
+
+      - name: Format
+        run: terraform fmt -check
+
+      - name: Init
+        run: terraform init -input=false
+
+      - name: Validate
+        run: terraform plan -input=false -refresh-only -var "github_repo=${{ github.repository }}"
+
+  validate_code:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_BUILDKIT: "1"
+      COMPOSE_DOCKER_CLI_BUILD: "1"
+
+    steps:
+      - name: Checkout
+        uses: "actions/checkout@v3"
+
+      - name: Set up Docker Buildx
+        uses: "docker/setup-buildx-action@v2"
+
+      - name: Build Testing Image
+        uses: "docker/build-push-action@v3"
+        with:
+          load: true
+          file: Dockerfile.ci
+          context: "."
+          tags: "biblion-ci:latest"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start Background Services
+        run: docker compose -f 'docker-compose.base.yml' up --detach
+
+      - name: Format
+        run: "docker run biblion-ci:latest pipenv run lint"
+
+      - name: Lint
+        run: "docker run biblion-ci:latest pipenv run black --check ."
+
+      - name: Test
+        run: "docker run --network='biblion-network' biblion-ci:latest pipenv run -- pytest -p no:cacheprovider ."
