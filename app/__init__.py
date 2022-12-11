@@ -20,7 +20,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # TODO: add production origin
+    allow_origins=[os.environ.get("WEBSITE_BASE_URL")],
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True,

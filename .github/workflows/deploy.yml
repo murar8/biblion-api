@@ -6,72 +6,143 @@ on:
     tags: ["v*.*.*"]
 
 jobs:
-  deploy:
+  deploy_infrastructure:
     runs-on: ubuntu-latest
+
+    defaults: { run: { working-directory: terraform } }
+
+    outputs:
+      gcloud_region: "${{ fromJSON(steps.output.outputs.stdout).gcloud_region.value }}"
+      gcloud_registry: "${{ fromJSON(steps.output.outputs.stdout).gcloud_registry.value }}"
+      gcloud_repository: "${{ fromJSON(steps.output.outputs.stdout).gcloud_repository.value }}"
+      gcloud_service: "${{ fromJSON(steps.output.outputs.stdout).gcloud_service.value }}"
+      github_identity_provider: "${{ fromJSON(steps.output.outputs.stdout).github_identity_provider.value }}"
+      github_service_account: "${{ fromJSON(steps.output.outputs.stdout).github_service_account.value }}"
+
+    env:
+      TF_IN_AUTOMATION: "1"
+      TF_CLI_ARGS: "-no-color"
+
+    steps:
+      - name: Checkout
+        uses: "actions/checkout@v3"
+
+      - name: Setup Terraform
+        uses: "hashicorp/setup-terraform@v2"
+        with: { cli_config_credentials_token: "${{ secrets.TF_API_TOKEN }}" }
+
+      - name: Format
+        run: terraform fmt -check
+
+      - name: Init
+        run: terraform init -input=false
+
+      - name: Validate
+        run: terraform validate
+
+      - name: Apply
+        run: terraform apply -input=false -auto-approve -var "github_repo=${{ github.repository }}"
+
+      - name: Output
+        id: output
+        run: terraform output -json
+
+  verify_quality:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_BUILDKIT: "1"
+      COMPOSE_DOCKER_CLI_BUILD: "1"
+
+    steps:
+      - name: Checkout
+        uses: "actions/checkout@v3"
+
+      - name: Set up Docker Buildx
+        uses: "docker/setup-buildx-action@v2"
+
+      - name: Build Testing Image
+        uses: "docker/build-push-action@v3"
+        with:
+          load: true
+          file: Dockerfile.ci
+          context: "."
+          tags: "biblion-ci:latest"
+          cache-from: type=gha,scope=${{ github.ref_name }}-${{ github.job }}
+          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-${{ github.job }}
+
+      - name: Start Background Services
+        run: docker compose -f 'docker-compose.base.yml' up --detach
+
+      - name: Format
+        run: "docker run biblion-ci:latest pipenv run lint"
+
+      - name: Lint
+        run: "docker run biblion-ci:latest pipenv run black --check ."
+
+      - name: Test
+        run: "docker run --network='biblion-network' biblion-ci:latest pipenv run -- pytest -p no:cacheprovider ."
+
+  build_push:
+    runs-on: ubuntu-latest
+
+    needs:
+      - deploy_infrastructure
+      - verify_quality
 
     # Necessary for Google Cloud login to work correctly.
     # IMPROVEMENT: Only add the necessary permissions for the deployment.
     # See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
     # See https://github.com/google-github-actions/auth#authenticating-via-workload-identity-federation
-    permissions: write-all
+    permissions: "write-all"
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup python
-        uses: actions/setup-python@v4
-        with: { python-version: "3.10" }
-
-      - name: Install pipenv
-        run: pip install pipenv wrapt # We need to install wrapt manually to be able to run pylint.
-
-      - name: Install dependencies
-        run: pipenv install --deploy --ignore-pipfile --dev
-
-      - name: Format
-        run: pipenv run format
-
-      - name: Lint
-        run: pipenv run lint
+        uses: "actions/checkout@v3"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Test
-        run: docker-compose -f "docker-compose.base.yml" -f "docker-compose.test.yml" run test
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: extract-docker-meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern=v{{major}}
-            type=sha,format=long,prefix=
-            type=edge
-
-      - name: Build and push
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          build-args: VERSION=${{ steps.extract-docker-meta.outputs.version }}
-          tags: ${{ steps.extract-docker-meta.outputs.tags }}
-          labels: ${{ steps.extract-docker-meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        uses: "docker/setup-buildx-action@v2"
 
       - name: Login to Google Cloud
+        id: "login-gcp"
         uses: "google-github-actions/auth@v1"
         with:
-          workload_identity_provider: ${{ secrets.GCLOUD_WORKLOAD_IDP }}
-          service_account: ${{ secrets.GCLOUD_SERVICE_ACCOUNT }}
+          token_format: "access_token"
+          workload_identity_provider: "${{ needs.deploy_infrastructure.outputs.github_identity_provider }}"
+          service_account: "${{ needs.deploy_infrastructure.outputs.github_service_account }}"
+
+      - name: Login to DockerHub
+        uses: "docker/login-action@v2"
+        with:
+          registry: "${{ needs.deploy_infrastructure.outputs.gcloud_registry }}"
+          username: oauth2accesstoken
+          password: "${{ steps.login-gcp.outputs.access_token }}"
+
+      - name: Extract Metadata (tags, labels) for Docker
+        id: "docker-metadata"
+        uses: "docker/metadata-action@v4"
+        with:
+          images: "${{ needs.deploy_infrastructure.outputs.gcloud_repository }}/biblion-api"
+          tags: |
+            type=sha,format=long,prefix=
+            type=edge
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{major}}
+
+      - name: Build and Push
+        uses: "docker/build-push-action@v3"
+        with:
+          push: true
+          context: "."
+          build-args: "VERSION=${{ steps.docker-metadata.outputs.version }}"
+          labels: "${{ steps.docker-metadata.outputs.labels }}"
+          tags: "${{ steps.docker-metadata.outputs.tags }}"
+          cache-from: type=gha,scope=${{ github.ref_name }}-${{ github.job }}
+          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-${{ github.job }}
+
+      - name: Deploy to Cloud Run
+        uses: "google-github-actions/deploy-cloudrun@v1"
+        with:
+          service: "${{ needs.deploy_infrastructure.outputs.gcloud_service }}"
+          region: "${{ needs.deploy_infrastructure.outputs.gcloud_region }}"
+          image: "${{ fromJSON(steps.docker-metadata.outputs.json).tags[0] }}"

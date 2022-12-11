@@ -4,10 +4,19 @@
   "service": "biblion-code",
   "workspaceFolder": "/app",
   "remoteUser": "vscode",
-  "extensions": ["ms-python.python", "ms-python.vscode-pylance"],
   "forwardPorts": [8000],
   "otherPortsAttributes": { "onAutoForward": "ignore" },
   "postCreateCommand": "pipenv install --dev",
+
+  "extensions": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "hashicorp.terraform"
+  ],
+
+  "features": {
+    "ghcr.io/devcontainers/features/terraform:1": {}
+  },
 
   "containerEnv": {
     "PIPENV_VENV_IN_PROJECT": "true"

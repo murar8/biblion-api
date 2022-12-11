@@ -24,6 +24,8 @@ class DatabaseConfig(pydantic.BaseSettings):
 class EmailConfig(pydantic.BaseSettings):
     sender: EmailStr
     smtp_server: str
+    smtp_username: str
+    smtp_password: str
     verification_expiration: conint(gt=0)
     password_reset_expiration: conint(gt=0)
 

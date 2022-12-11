@@ -12,7 +12,5 @@ COPY ./Pipfile ./Pipfile.lock ./
 
 RUN pipenv install --dev --deploy --ignore-pipfile --clear
 
-COPY ./app ./app/
-
-CMD pipenv run -- pytest -p no:cacheprovider . 
+COPY ./ ./
 

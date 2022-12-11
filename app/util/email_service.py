@@ -19,6 +19,7 @@ class EmailService:
         self.config = config
         self.smtp = smtplib.SMTP(config.smtp_server)
         self.environment = Environment(loader=FileSystemLoader("templates/"))
+        self.smtp.login(config.smtp_username, config.smtp_password)
 
     def __del__(self):
         self.smtp.quit()
