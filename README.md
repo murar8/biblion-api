@@ -43,7 +43,9 @@ All the production infrastruture is managed using [Terraform](https://www.terraf
 
 ## Deployment
 
-Deployment is handled automatically using a CI pipeline every time the code is pushed. Direct push to the `main` branch is not allowed, any updates to the production environment require a pull request to be opened.
+### Merging the code
+
+Direct push to the `main` branch is not allowed, any updates to the production environment require a pull request to be opened.
 
 When a PR for the `main` branch is opened or updated the following checks will run:
 
@@ -53,7 +55,7 @@ When a PR for the `main` branch is opened or updated the following checks will r
 
 After all checks pass the PR can be merged.
 
-## Deployment to production
+### Deployment to production
 
 When a new git tag is pushed (e.g. `v1.2.3`):
 
@@ -65,7 +67,7 @@ When a new git tag is pushed (e.g. `v1.2.3`):
 
 Please make sure to honor the SemVer specification when performing a version bump (refer to [https://semver.org/]()).
 
-### First deployment
+#### First deployment note
 
 To deploy the whole infrastructure from scratch the following manual steps are necessary:
 
