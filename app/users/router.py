@@ -92,27 +92,26 @@ async def update_user(
     if user_id != jwt.sub:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
+    data = body.dict(exclude_unset=True)
     to_set = {"updatedAt": datetime.utcnow()}
     to_unset = {}
 
-    if body.name:
-        to_set["name"] = body.name
+    if "name" in data:
+        if data["name"]:
+            to_set["name"] = data["name"]
+        else:
+            to_unset["name"] = ""
 
-    if body.name == "":
-        to_unset["name"] = ""
-
-    if body.email:
-        to_set["email"] = body.email
+    if "email" in data:
+        to_set["email"] = data["email"]
         to_set["verified"] = False
 
-    result = await database.users.update_one(
-        {"_id": user_id}, {"$set": to_set, "$unset": to_unset}
+    user = await database.users.find_one_and_update(
+        {"_id": user_id},
+        {"$set": to_set, "$unset": to_unset},
+        return_document=ReturnDocument.AFTER,
     )
 
-    if not result.matched_count:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
-
-    user = await database.users.find_one({"_id": user_id})
     return UserResponse.from_mongo(user)
 
 

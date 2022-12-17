@@ -86,6 +86,21 @@ async def test_update_user(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+async def test_update_user_unset_name(app_client: AsyncClient):
+    data = {"name": ""}
+
+    response = await app_client.patch(
+        "users/f4c8e142-5a8e-4759-9eec-74d9139dcfd5", json=data
+    )
+
+    json = response.json()
+
+    assert response.status_code == HTTPStatus.OK
+    assert not json["name"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_user_unauthorized(app_client: AsyncClient):
     response = await app_client.patch(
         "users/34b8028f-a220-498e-85c9-7304e44cb272",

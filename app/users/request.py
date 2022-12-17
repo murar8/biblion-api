@@ -14,7 +14,7 @@ class CreateUserRequest(BaseModel):
 
 class UpdateUserRequest(BaseModel):
     email: Optional[EmailStr]
-    name: Optional[constr(min_length=1, max_length=NAME_MAX_LEN)]
+    name: Optional[constr(max_length=NAME_MAX_LEN)]
 
 
 class LoginUserRequest(BaseModel):
