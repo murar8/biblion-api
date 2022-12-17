@@ -181,11 +181,9 @@ async def test_verify_user(app_client: AsyncClient):
         "users/verify/03d06d59-5fd5-4c49-bafe-91bab21d1391"
     )
 
-    assert response.status_code == HTTPStatus.NO_CONTENT
-
-    response = await app_client.get("users/af71f215-c3f8-441f-9498-e75f8dfbcf4b")
     json = response.json()
 
+    assert response.status_code == HTTPStatus.OK
     assert json["verified"] is True
 
 

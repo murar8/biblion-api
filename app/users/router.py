@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
+from pymongo import ReturnDocument
 from pymongo.database import Database
 
 from app.providers.access_token import get_access_token
@@ -190,8 +191,8 @@ async def request_email_verification(
     )
 
 
-@router.post("/verify/{code}", status_code=HTTPStatus.NO_CONTENT)
-async def verify_user(
+@router.post("/verify/{code}", response_model=UserResponse)
+async def verify_email(
     code: uuid.UUID,
     database: Database = Depends(get_database),
     user: dict[str, any] = Depends(get_logged_user),
@@ -216,13 +217,16 @@ async def verify_user(
             status_code=HTTPStatus.UNAUTHORIZED, detail="Verification code is invalid."
         )
 
-    await database.users.update_one(
+    user = await database.users.find_one_and_update(
         {"_id": user["_id"]},
         {
             "$set": {"verified": True, "updatedAt": datetime.now()},
             "$unset": {"verificationCode": "", "verificationCodeIat": ""},
         },
+        return_document=ReturnDocument.AFTER,
     )
+
+    return UserResponse.from_mongo(user)
 
 
 @router.post("/password-reset", status_code=HTTPStatus.NO_CONTENT)
