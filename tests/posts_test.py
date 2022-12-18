@@ -7,7 +7,7 @@ from httpx import AsyncClient
 
 @pytest.mark.asyncio
 async def test_get_post(app_client: AsyncClient):
-    response = await app_client.get("posts/bdu764rt")
+    response = await app_client.get("v1/posts/bdu764rt")
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -22,13 +22,13 @@ async def test_get_post(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_post_non_existent(app_client: AsyncClient):
-    response = await app_client.get("posts/fakeid")
+    response = await app_client.get("v1/posts/fakeid")
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.asyncio
 async def test_get_posts(app_client: AsyncClient):
-    response = await app_client.get("posts", params={"limit": "32"})
+    response = await app_client.get("v1/posts", params={"limit": "32"})
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -41,7 +41,7 @@ async def test_get_posts(app_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_get_posts_paging(app_client: AsyncClient):
     params = {"limit": "2", "skip": "1"}
-    response = await app_client.get("posts", params=params)
+    response = await app_client.get("v1/posts", params=params)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -54,7 +54,7 @@ async def test_get_posts_paging(app_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_get_posts_owner_id(app_client: AsyncClient):
     params = {"ownerId": "f4c8e142-5a8e-4759-9eec-74d9139dcfd5"}
-    response = await app_client.get("posts", params=params)
+    response = await app_client.get("v1/posts", params=params)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -66,7 +66,7 @@ async def test_get_posts_owner_id(app_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_get_posts_language(app_client: AsyncClient):
     params = {"language": "ts"}
-    response = await app_client.get("posts", params=params)
+    response = await app_client.get("v1/posts", params=params)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -77,7 +77,7 @@ async def test_get_posts_language(app_client: AsyncClient):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_create_post(app_client: AsyncClient):
-    response = await app_client.post("posts", json={"content": "Test"})
+    response = await app_client.post("v1/posts", json={"content": "Test"})
     json = response.json()
 
     assert response.status_code == HTTPStatus.CREATED
@@ -93,7 +93,7 @@ async def test_create_post(app_client: AsyncClient):
 async def test_update_post(app_client: AsyncClient):
     now = datetime.utcnow()
     data = {"content": "Hello, You!"}
-    response = await app_client.patch("posts/bdu764rt", json=data)
+    response = await app_client.patch("v1/posts/bdu764rt", json=data)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -110,7 +110,7 @@ async def test_update_post(app_client: AsyncClient):
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post_non_existent(app_client: AsyncClient):
     data = {"content": "console.log('Update!')"}
-    response = await app_client.patch("posts/fakeid", json=data)
+    response = await app_client.patch("v1/posts/fakeid", json=data)
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
@@ -118,26 +118,26 @@ async def test_update_post_non_existent(app_client: AsyncClient):
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post_non_owned(app_client: AsyncClient):
     data = {"content": "console.log('Update!')"}
-    response = await app_client.patch("posts/ctrdg53d", json=data)
+    response = await app_client.patch("v1/posts/ctrdg53d", json=data)
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_delete_post(app_client: AsyncClient):
-    response = await app_client.delete("posts/bdu764rt")
+    response = await app_client.delete("v1/posts/bdu764rt")
     assert response.status_code == HTTPStatus.NO_CONTENT
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_delete_post_non_owned(app_client: AsyncClient):
-    response = await app_client.delete("posts/ctrdg53d")
+    response = await app_client.delete("v1/posts/ctrdg53d")
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_delete_post_non_existent(app_client: AsyncClient):
-    response = await app_client.delete("posts/fakeid")
+    response = await app_client.delete("v1/posts/fakeid")
     assert response.status_code == HTTPStatus.NOT_FOUND
