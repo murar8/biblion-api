@@ -21,9 +21,9 @@ from app.users.request import (
     UpdateUserRequest,
 )
 from app.users.response import UserResponse
-from app.util.access_token import AccessToken
-from app.util.config import Config
-from app.util.email_service import EmailService
+from app.access_token import AccessToken
+from app.config import Config
+from app.email_service import EmailService
 
 router = APIRouter()
 

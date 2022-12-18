@@ -9,7 +9,7 @@ from app.posts.request import CreatePostRequest, GetPostsParams, UpdatePostReque
 from app.posts.response import PaginatedResponse, PostResponse
 from app.providers.access_token import get_access_token
 from app.providers.database import get_database
-from app.util.access_token import AccessToken
+from app.access_token import AccessToken
 from app.util.shortid import generate_shortid
 
 router = APIRouter()

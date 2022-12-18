@@ -4,7 +4,7 @@ from typing import TypedDict
 
 from jinja2 import Environment, FileSystemLoader
 
-from app.util.config import EmailConfig
+from app.config import EmailConfig
 
 
 class SendEmailArgs(TypedDict):

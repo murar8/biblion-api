@@ -4,7 +4,7 @@ from fastapi import Cookie, Depends, HTTPException
 from jwt import DecodeError, ExpiredSignatureError
 
 from app.providers.config import Config, get_config
-from app.util.access_token import AccessToken
+from app.access_token import AccessToken
 
 
 def get_access_token(

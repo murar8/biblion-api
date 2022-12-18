@@ -5,7 +5,7 @@ from httpx import AsyncClient
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app import app
-from app.util.config import Config
+from app.config import Config
 from tests.seed import posts_seed, users_seed
 
 

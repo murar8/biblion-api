@@ -5,7 +5,7 @@ from pymongo.database import Database
 
 from app.providers.access_token import get_access_token
 from app.providers.database import get_database
-from app.util.access_token import AccessToken
+from app.access_token import AccessToken
 
 
 async def get_logged_user(
