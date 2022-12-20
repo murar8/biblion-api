@@ -93,15 +93,15 @@ async def test_create_post(app_client: AsyncClient):
 async def test_update_post(app_client: AsyncClient):
     now = datetime.utcnow()
     data = {"content": "Hello, You!"}
-    response = await app_client.patch("v1/posts/bdu764rt", json=data)
+    response = await app_client.put("v1/posts/bdu764rt", json=data)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
     assert json["id"] == "bdu764rt"
     assert json["ownerId"] == "f4c8e142-5a8e-4759-9eec-74d9139dcfd5"
     assert json["content"] == "Hello, You!"
-    assert json["name"] == "hello.txt"
-    assert json["language"] == "txt"
+    assert json["name"] is None
+    assert json["language"] is None
     assert datetime.fromisoformat(json["createdAt"])
     assert datetime.fromisoformat(json["updatedAt"]) >= now
 
@@ -110,7 +110,7 @@ async def test_update_post(app_client: AsyncClient):
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post_non_existent(app_client: AsyncClient):
     data = {"content": "console.log('Update!')"}
-    response = await app_client.patch("v1/posts/fakeid", json=data)
+    response = await app_client.put("v1/posts/fakeid", json=data)
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
@@ -118,7 +118,7 @@ async def test_update_post_non_existent(app_client: AsyncClient):
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post_non_owned(app_client: AsyncClient):
     data = {"content": "console.log('Update!')"}
-    response = await app_client.patch("v1/posts/ctrdg53d", json=data)
+    response = await app_client.put("v1/posts/ctrdg53d", json=data)
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 

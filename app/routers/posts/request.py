@@ -21,9 +21,3 @@ class CreatePostRequest(BaseModel):
     content: constr(max_length=CONTENT_MAX_LEN)
     name: Optional[constr(max_length=NAME_MAX_LEN)]
     language: Optional[constr(max_length=LANGUAGE_MAX_LEN)]
-
-
-class UpdatePostRequest(BaseModel):
-    content: Optional[constr(max_length=CONTENT_MAX_LEN)]
-    name: Optional[constr(max_length=NAME_MAX_LEN)]
-    language: Optional[constr(max_length=LANGUAGE_MAX_LEN)]

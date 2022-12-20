@@ -8,22 +8,24 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pymongo import ReturnDocument
 from pymongo.database import Database
+from pymongo.errors import DuplicateKeyError
 
+from app.access_token import AccessToken
+from app.config import Config
+from app.email_service import EmailService
 from app.providers.access_token import get_access_token
 from app.providers.config import get_config
 from app.providers.database import get_database
 from app.providers.email_service import get_email_service
 from app.providers.logged_user import get_logged_user
-from app.users.request import (
+
+from .request import (
     CreateUserRequest,
     LoginUserRequest,
     ResetPasswordRequest,
     UpdateUserRequest,
 )
-from app.users.response import UserResponse
-from app.access_token import AccessToken
-from app.config import Config
-from app.email_service import EmailService
+from .response import UserResponse
 
 router = APIRouter()
 
@@ -48,18 +50,6 @@ async def create_user(
     body: CreateUserRequest,
     database: Database = Depends(get_database),
 ):
-    find = [{"email": body.email}]
-
-    if body.name:
-        find.append({"name": body.name})
-
-    user = await database.users.find_one({"$or": find})
-
-    if user:
-        raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail="User already exists."
-        )
-
     created_at = datetime.utcnow()
     salt = bcrypt.gensalt()
     password_hash = bcrypt.hashpw(body.password.encode(), salt)
@@ -76,8 +66,14 @@ async def create_user(
     if body.name:
         document["name"] = body.name
 
-    res = await database.users.insert_one(document=document)
-    user = await database.users.find_one({"_id": res.inserted_id})
+    try:
+        result = await database.users.insert_one(document=document)
+    except DuplicateKeyError as exc:
+        key, value = list(exc.details["keyValue"].items())[0]
+        detail = f"An user with {key} '{value}' already exists."
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=detail) from exc
+
+    user = await database.users.find_one({"_id": result.inserted_id})
 
     return UserResponse.from_mongo(user)
 
@@ -100,17 +96,22 @@ async def update_user(
         if data["name"]:
             to_set["name"] = data["name"]
         else:
-            to_unset["name"] = ""
+            to_unset["name"] = None
 
     if "email" in data:
         to_set["email"] = data["email"]
         to_set["verified"] = False
 
-    user = await database.users.find_one_and_update(
-        {"_id": user_id},
-        {"$set": to_set, "$unset": to_unset},
-        return_document=ReturnDocument.AFTER,
-    )
+    try:
+        user = await database.users.find_one_and_update(
+            {"_id": user_id},
+            {"$set": to_set, "$unset": to_unset},
+            return_document=ReturnDocument.AFTER,
+        )
+    except DuplicateKeyError as exc:
+        key, value = list(exc.details["keyValue"].items())[0]
+        detail = f"An user with {key} '{value}' already exists."
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=detail) from exc
 
     return UserResponse.from_mongo(user)
 

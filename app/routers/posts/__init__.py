@@ -3,14 +3,17 @@ from http import HTTPStatus
 
 import pymongo
 from fastapi import APIRouter, Depends, HTTPException
+from pymongo import ReturnDocument
 from pymongo.database import Database
+from pymongo.errors import DuplicateKeyError
 
-from app.posts.request import CreatePostRequest, GetPostsParams, UpdatePostRequest
-from app.posts.response import PaginatedResponse, PostResponse
+from app.access_token import AccessToken
 from app.providers.access_token import get_access_token
 from app.providers.database import get_database
-from app.access_token import AccessToken
 from app.util.shortid import generate_shortid
+
+from .request import CreatePostRequest, GetPostsParams
+from .response import PaginatedResponse, PostResponse
 
 router = APIRouter()
 
@@ -76,9 +79,6 @@ async def create_post(
     while True:
         uid = generate_shortid()
 
-        if await database.posts.find_one({"_id": uid}):
-            continue
-
         created_at = datetime.utcnow()
         document = {
             "_id": uid,
@@ -87,22 +87,23 @@ async def create_post(
             "updatedAt": created_at,
             **body.dict(),
         }
-        await database.posts.insert_one(document=document)
+
+        try:
+            await database.posts.insert_one(document=document)
+        except DuplicateKeyError:
+            continue
 
         post = await database.posts.find_one({"_id": uid})
         return PostResponse.from_mongo(post)
 
 
-@router.patch("/{post_id}", response_model=PostResponse)
+@router.put("/{post_id}", response_model=PostResponse)
 async def update_post(
     post_id: str,
-    body: UpdatePostRequest,
+    body: CreatePostRequest,
     jwt: AccessToken = Depends(get_access_token),
     database: Database = Depends(get_database),
 ):
-    where = {"_id": post_id, "ownerId": jwt.sub}
-    update = {"$set": {**body.dict(exclude_unset=True), "updatedAt": datetime.utcnow()}}
-    await database.posts.update_one(where, update)
     post = await database.posts.find_one({"_id": post_id})
 
     if not post:
@@ -110,6 +111,12 @@ async def update_post(
 
     if post["ownerId"] != jwt.sub:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
+
+    post = await database.posts.find_one_and_update(
+        {"_id": post_id},
+        {"$set": {**body.dict(), "updatedAt": datetime.utcnow()}},
+        return_document=ReturnDocument.AFTER,
+    )
 
     return PostResponse.from_mongo(post)
 
