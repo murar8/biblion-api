@@ -41,4 +41,5 @@ async def validation_exception_handler(_, exception: ValidationError):
 router = APIRouter(prefix="/v1")
 router.include_router(posts_router, prefix="/posts", tags=["posts"])
 router.include_router(users_router, prefix="/users", tags=["users"])
+
 app.include_router(router)
