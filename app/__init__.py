@@ -34,7 +34,7 @@ async def validation_exception_handler(_, exception: ValidationError):
         {**error, "loc": ["query"] + list(error["loc"])} for error in exception.errors()
     ]
     return JSONResponse(
-        status_code=HTTPStatus.UNPROCESSABLE_ENTITY, content={"error": errors}
+        status_code=HTTPStatus.UNPROCESSABLE_ENTITY, content={"detail": errors}
     )
 
 
