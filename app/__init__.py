@@ -1,13 +1,13 @@
 import os
 from http import HTTPStatus
 
-from fastapi import FastAPI, APIRouter
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
-from app.routers.posts import router as posts_router
-from app.routers.users import router as users_router
+from app.routers.posts_router import posts_router
+from app.routers.users_router import users_router
 
 app = FastAPI(
     title="Biblion",

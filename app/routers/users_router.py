@@ -13,29 +13,28 @@ from pymongo.errors import DuplicateKeyError
 from app.access_token import AccessToken
 from app.config import Config
 from app.email_service import EmailService
+from app.models.users_requests import (
+    CreateUserRequest,
+    LoginUserRequest,
+    ResetPasswordRequest,
+    UpdateUserRequest,
+)
+from app.models.users_responses import UserResponse
 from app.providers.access_token import get_access_token
 from app.providers.config import get_config
 from app.providers.database import get_database
 from app.providers.email_service import get_email_service
 from app.providers.logged_user import get_logged_user
 
-from .request import (
-    CreateUserRequest,
-    LoginUserRequest,
-    ResetPasswordRequest,
-    UpdateUserRequest,
-)
-from .response import UserResponse
-
-router = APIRouter()
+users_router = APIRouter()
 
 
-@router.get("/me", response_model=UserResponse)
+@users_router.get("/me", response_model=UserResponse)
 async def get_current_user(user: dict[str, any] = Depends(get_logged_user)):
     return UserResponse.from_mongo(user)
 
 
-@router.get("/{user_id}", response_model=UserResponse)
+@users_router.get("/{user_id}", response_model=UserResponse)
 async def get_user(user_id: uuid.UUID, database: Database = Depends(get_database)):
     user = await database.users.find_one({"_id": user_id})
 
@@ -45,7 +44,7 @@ async def get_user(user_id: uuid.UUID, database: Database = Depends(get_database
     return UserResponse.from_mongo(user)
 
 
-@router.post("/", response_model=UserResponse, status_code=HTTPStatus.CREATED)
+@users_router.post("/", response_model=UserResponse, status_code=HTTPStatus.CREATED)
 async def create_user(
     body: CreateUserRequest,
     database: Database = Depends(get_database),
@@ -78,7 +77,7 @@ async def create_user(
     return UserResponse.from_mongo(user)
 
 
-@router.patch("/{user_id}", response_model=UserResponse)
+@users_router.patch("/{user_id}", response_model=UserResponse)
 async def update_user(
     user_id: uuid.UUID,
     body: UpdateUserRequest,
@@ -116,7 +115,7 @@ async def update_user(
     return UserResponse.from_mongo(user)
 
 
-@router.post("/login", response_model=UserResponse)
+@users_router.post("/login", response_model=UserResponse)
 async def login_user(
     body: LoginUserRequest,
     response: Response,
@@ -147,7 +146,7 @@ async def login_user(
     return UserResponse.from_mongo(user)
 
 
-@router.post("/logout", status_code=HTTPStatus.NO_CONTENT)
+@users_router.post("/logout", status_code=HTTPStatus.NO_CONTENT)
 async def logout_user(response: Response):
     response.set_cookie(
         key="access_token",
@@ -158,7 +157,7 @@ async def logout_user(response: Response):
     )
 
 
-@router.post("/verify", status_code=HTTPStatus.NO_CONTENT)
+@users_router.post("/verify", status_code=HTTPStatus.NO_CONTENT)
 async def request_email_verification(
     database: Database = Depends(get_database),
     config: Config = Depends(get_config),
@@ -191,7 +190,7 @@ async def request_email_verification(
     )
 
 
-@router.post("/verify/{code}", response_model=UserResponse)
+@users_router.post("/verify/{code}", response_model=UserResponse)
 async def verify_email(
     code: uuid.UUID,
     database: Database = Depends(get_database),
@@ -229,7 +228,7 @@ async def verify_email(
     return UserResponse.from_mongo(user)
 
 
-@router.post("/password-reset", status_code=HTTPStatus.NO_CONTENT)
+@users_router.post("/password-reset", status_code=HTTPStatus.NO_CONTENT)
 async def request_password_reset(
     database: Database = Depends(get_database),
     config: Config = Depends(get_config),
@@ -262,7 +261,7 @@ async def request_password_reset(
     )
 
 
-@router.post("/password-reset/{code}", status_code=HTTPStatus.NO_CONTENT)
+@users_router.post("/password-reset/{code}", status_code=HTTPStatus.NO_CONTENT)
 async def reset_password(
     code: uuid.UUID,
     body: ResetPasswordRequest,
