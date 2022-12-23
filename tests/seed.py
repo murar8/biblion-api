@@ -1,11 +1,11 @@
 from datetime import datetime
-import uuid
+from uuid import UUID
 
 
 posts_seed = [
     {
         "_id": "a46yh2d3",
-        "ownerId": uuid.UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
+        "ownerId": UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
         "content": "console.log('Hello, world!')",
         "name": "hello.js",
         "language": "js",
@@ -14,7 +14,7 @@ posts_seed = [
     },
     {
         "_id": "bdu764rt",
-        "ownerId": uuid.UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
+        "ownerId": UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
         "content": "Hello, world!",
         "name": "hello.txt",
         "language": "txt",
@@ -23,7 +23,7 @@ posts_seed = [
     },
     {
         "_id": "ctrdg53d",
-        "ownerId": uuid.UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
+        "ownerId": UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
         "content": "console.log('Hello, world!')",
         "name": "test.ts",
         "language": "ts",
@@ -32,7 +32,7 @@ posts_seed = [
     },
     {
         "_id": "d7yhmbr5",
-        "ownerId": uuid.UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
+        "ownerId": UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
         "content": "Hello, world!",
         "name": "hi.txt",
         "language": "txt",
@@ -44,7 +44,7 @@ posts_seed = [
 
 users_seed = [
     {
-        "_id": uuid.UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
+        "_id": UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
         "email": "mrbrown@user.com",
         "name": "mr_brown",
         "passwordHash": (
@@ -56,7 +56,7 @@ users_seed = [
         "updatedAt": datetime(2002, 10, 28, 14, 0, 0),
     },
     {
-        "_id": uuid.UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
+        "_id": UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
         "email": "mrgreen@user.com",
         "name": "mr_green",
         "passwordHash": (
@@ -68,7 +68,7 @@ users_seed = [
         "updatedAt": datetime(2002, 10, 28, 14, 0, 0),
     },
     {
-        "_id": uuid.UUID("af71f215-c3f8-441f-9498-e75f8dfbcf4b"),
+        "_id": UUID("af71f215-c3f8-441f-9498-e75f8dfbcf4b"),
         "email": "mrred@user.com",
         "name": "mr_red",
         "passwordHash": (
@@ -78,9 +78,9 @@ users_seed = [
         "verified": False,
         "createdAt": datetime(2002, 10, 22, 2, 0, 0),
         "updatedAt": datetime(2002, 11, 28, 14, 0, 0),
-        "verificationCode": uuid.UUID("03d06d59-5fd5-4c49-bafe-91bab21d1391"),
+        "verificationCode": UUID("03d06d59-5fd5-4c49-bafe-91bab21d1391"),
         "verificationCodeIat": datetime.now(),
-        "resetCode": uuid.UUID("6e94e45a-5f47-4b38-9483-6b1d5d57266b"),
+        "resetCode": UUID("6e94e45a-5f47-4b38-9483-6b1d5d57266b"),
         "resetCodeIat": datetime.now(),
     },
 ]

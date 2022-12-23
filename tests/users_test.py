@@ -66,10 +66,10 @@ async def test_create_user_invalid(app_client: AsyncClient):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_user(app_client: AsyncClient):
-    data = {"email": "mrbrown2@user.com"}
+    body = {"email": "mrbrown2@user.com"}
 
     response = await app_client.patch(
-        "v1/users/f4c8e142-5a8e-4759-9eec-74d9139dcfd5", json=data
+        "v1/users/f4c8e142-5a8e-4759-9eec-74d9139dcfd5", json=body
     )
 
     json = response.json()
@@ -87,16 +87,16 @@ async def test_update_user(app_client: AsyncClient):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_user_unset_name(app_client: AsyncClient):
-    data = {"name": ""}
+    body = {"name": ""}
 
     response = await app_client.patch(
-        "v1/users/f4c8e142-5a8e-4759-9eec-74d9139dcfd5", json=data
+        "v1/users/f4c8e142-5a8e-4759-9eec-74d9139dcfd5", json=body
     )
 
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
-    assert not json["name"]
+    assert json["name"] is None
 
 
 @pytest.mark.asyncio
@@ -124,8 +124,8 @@ async def test_login_user(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_login_user_with_name(app_client: AsyncClient):
-    data = {"name": "mr_brown", "password": "hastasiempre"}
-    response = await app_client.post("v1/users/login", json=data)
+    body = {"name": "mr_brown", "password": "hastasiempre"}
+    response = await app_client.post("v1/users/login", json=body)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -135,8 +135,8 @@ async def test_login_user_with_name(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_login_user_with_email(app_client: AsyncClient):
-    data = {"email": "mrbrown@user.com", "password": "hastasiempre"}
-    response = await app_client.post("v1/users/login", json=data)
+    body = {"email": "mrbrown@user.com", "password": "hastasiempre"}
+    response = await app_client.post("v1/users/login", json=body)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -146,8 +146,8 @@ async def test_login_user_with_email(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_login_user_bad_credentials(app_client: AsyncClient):
-    data = {"name": "mr_brown", "password": "hastasiempres"}
-    response = await app_client.post("v1/users/login", json=data)
+    body = {"name": "mr_brown", "password": "hastasiempres"}
+    response = await app_client.post("v1/users/login", json=body)
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert not response.cookies.get("access_token")
@@ -155,8 +155,8 @@ async def test_login_user_bad_credentials(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_login_user_non_existent(app_client: AsyncClient):
-    data = {"name": "mr_nope", "password": "hastasiempres"}
-    response = await app_client.post("v1/users/login", json=data)
+    body = {"name": "mr_nope", "password": "hastasiempres"}
+    response = await app_client.post("v1/users/login", json=body)
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert not response.cookies.get("access_token")
@@ -231,9 +231,9 @@ async def test_request_password_reset(app_client: AsyncClient):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_red"}], indirect=True)
 async def test_reset_password(app_client: AsyncClient):
-    data = {"password": "hastanoche"}
+    body = {"password": "hastanoche"}
     response = await app_client.post(
-        "v1/users/password-reset/6e94e45a-5f47-4b38-9483-6b1d5d57266b", json=data
+        "v1/users/password-reset/6e94e45a-5f47-4b38-9483-6b1d5d57266b", json=body
     )
     assert response.status_code == HTTPStatus.NO_CONTENT
 
@@ -252,7 +252,7 @@ async def test_reset_password(app_client: AsyncClient):
     # Reset code should only be valid for a single operation.
 
     response = await app_client.post(
-        "v1/users/password-reset/6e94e45a-5f47-4b38-9483-6b1d5d57266b", json=data
+        "v1/users/password-reset/6e94e45a-5f47-4b38-9483-6b1d5d57266b", json=body
     )
     assert response.status_code == HTTPStatus.NOT_FOUND
 
@@ -260,9 +260,9 @@ async def test_reset_password(app_client: AsyncClient):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_reset_password_no_request_found(app_client: AsyncClient):
-    data = {"password": "hastanoche"}
+    body = {"password": "hastanoche"}
     response = await app_client.post(
-        "v1/users/password-reset/fc677ae6-6e43-4b7e-b53c-bb4fe98bff29", json=data
+        "v1/users/password-reset/fc677ae6-6e43-4b7e-b53c-bb4fe98bff29", json=body
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND

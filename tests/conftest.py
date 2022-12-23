@@ -72,7 +72,7 @@ async def app_client(request):
                 )
 
             case _:
-                raise Exception(f"Invalid token: {request.param['access_token']}")
+                raise Exception(f"Invalid token: '{request.param['access_token']}'")
 
     yield client
 

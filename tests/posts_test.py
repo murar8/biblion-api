@@ -8,6 +8,7 @@ from httpx import AsyncClient
 @pytest.mark.asyncio
 async def test_get_post(app_client: AsyncClient):
     response = await app_client.get("v1/posts/bdu764rt")
+
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -40,8 +41,8 @@ async def test_get_posts(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_posts_paging(app_client: AsyncClient):
-    params = {"limit": "2", "skip": "1"}
-    response = await app_client.get("v1/posts", params=params)
+    query = {"limit": "2", "skip": "1"}
+    response = await app_client.get("v1/posts", params=query)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -53,8 +54,8 @@ async def test_get_posts_paging(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_posts_owner_id(app_client: AsyncClient):
-    params = {"ownerId": "f4c8e142-5a8e-4759-9eec-74d9139dcfd5"}
-    response = await app_client.get("v1/posts", params=params)
+    query = {"ownerId": "f4c8e142-5a8e-4759-9eec-74d9139dcfd5"}
+    response = await app_client.get("v1/posts", params=query)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -65,8 +66,8 @@ async def test_get_posts_owner_id(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_posts_language(app_client: AsyncClient):
-    params = {"language": "ts"}
-    response = await app_client.get("v1/posts", params=params)
+    query = {"language": "ts"}
+    response = await app_client.get("v1/posts", params=query)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -92,8 +93,8 @@ async def test_create_post(app_client: AsyncClient):
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post(app_client: AsyncClient):
     now = datetime.utcnow()
-    data = {"content": "Hello, You!"}
-    response = await app_client.put("v1/posts/bdu764rt", json=data)
+    body = {"content": "Hello, You!"}
+    response = await app_client.put("v1/posts/bdu764rt", json=body)
     json = response.json()
 
     assert response.status_code == HTTPStatus.OK
@@ -102,23 +103,22 @@ async def test_update_post(app_client: AsyncClient):
     assert json["content"] == "Hello, You!"
     assert json["name"] is None
     assert json["language"] is None
-    assert datetime.fromisoformat(json["createdAt"])
     assert datetime.fromisoformat(json["updatedAt"]) >= now
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post_non_existent(app_client: AsyncClient):
-    data = {"content": "console.log('Update!')"}
-    response = await app_client.put("v1/posts/fakeid", json=data)
+    body = {"content": "console.log('Update!')"}
+    response = await app_client.put("v1/posts/fakeid", json=body)
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post_non_owned(app_client: AsyncClient):
-    data = {"content": "console.log('Update!')"}
-    response = await app_client.put("v1/posts/ctrdg53d", json=data)
+    body = {"content": "console.log('Update!')"}
+    response = await app_client.put("v1/posts/ctrdg53d", json=body)
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 

@@ -16,8 +16,8 @@ async def get_logged_user(
 
     if not user:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="No user found for the provided credentials.",
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="The provided token does not match any existing user.",
         )
 
     return user

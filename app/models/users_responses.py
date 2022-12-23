@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import uuid
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class UserResponse(BaseModel):
-    id: uuid.UUID
+    id: UUID
     email: str
     name: Optional[str]
     verified: bool

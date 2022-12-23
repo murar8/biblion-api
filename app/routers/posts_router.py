@@ -22,7 +22,7 @@ async def get_post(post_id: str, database: Database = Depends(get_database)):
     post = await database.posts.find_one({"_id": post_id})
 
     if not post:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
 
     return PostResponse.from_mongo(post)
 
@@ -76,11 +76,11 @@ async def create_post(
     # We use short ids to make it easy for users to share posts by id, so we
     # have to take into account the (unlikely) possibility of having two ids clashing.
     while True:
-        uid = generate_shortid()
-
+        post_id = generate_shortid()
         created_at = datetime.utcnow()
+
         document = {
-            "_id": uid,
+            "_id": post_id,
             "ownerId": jwt.sub,
             "createdAt": created_at,
             "updatedAt": created_at,
@@ -92,7 +92,7 @@ async def create_post(
         except DuplicateKeyError:
             continue
 
-        post = await database.posts.find_one({"_id": uid})
+        post = await database.posts.find_one({"_id": post_id})
         return PostResponse.from_mongo(post)
 
 

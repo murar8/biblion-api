@@ -1,8 +1,8 @@
-import uuid
 from datetime import datetime, timedelta
 from functools import reduce
 from http import HTTPStatus
 from urllib.parse import urljoin
+from uuid import UUID, uuid4
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
@@ -35,7 +35,7 @@ async def get_current_user(user: dict[str, any] = Depends(get_logged_user)):
 
 
 @users_router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: uuid.UUID, database: Database = Depends(get_database)):
+async def get_user(user_id: UUID, database: Database = Depends(get_database)):
     user = await database.users.find_one({"_id": user_id})
 
     if not user:
@@ -54,7 +54,7 @@ async def create_user(
     password_hash = bcrypt.hashpw(body.password.encode(), salt)
 
     document = {
-        "_id": uuid.uuid4(),
+        "_id": uuid4(),
         "email": body.email,
         "passwordHash": password_hash,
         "verified": False,
@@ -69,17 +69,16 @@ async def create_user(
         result = await database.users.insert_one(document=document)
     except DuplicateKeyError as exc:
         key, value = list(exc.details["keyValue"].items())[0]
-        detail = f"An user with {key} '{value}' already exists."
+        detail = f"An user with '{key}'='{value}' already exists."
         raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=detail) from exc
 
     user = await database.users.find_one({"_id": result.inserted_id})
-
     return UserResponse.from_mongo(user)
 
 
 @users_router.patch("/{user_id}", response_model=UserResponse)
 async def update_user(
-    user_id: uuid.UUID,
+    user_id: UUID,
     body: UpdateUserRequest,
     jwt: AccessToken = Depends(get_access_token),
     database: Database = Depends(get_database),
@@ -109,7 +108,7 @@ async def update_user(
         )
     except DuplicateKeyError as exc:
         key, value = list(exc.details["keyValue"].items())[0]
-        detail = f"An user with {key} '{value}' already exists."
+        detail = f"An user with '{key}'='{value}' already exists."
         raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=detail) from exc
 
     return UserResponse.from_mongo(user)
@@ -122,18 +121,17 @@ async def login_user(
     database: Database = Depends(get_database),
     config: Config = Depends(get_config),
 ):
-    find = [{"email": body.email}]
-
-    if body.name:
-        find.append({"name": body.name})
-
-    user = await database.users.find_one({"$or": find})
+    user = await database.users.find_one(
+        {"name": body.name} if body.name else {"email": body.email}
+    )
 
     if not user:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="User not found.")
 
     if not bcrypt.checkpw(body.password.encode(), user["passwordHash"]):
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid password."
+        )
 
     response.set_cookie(
         key="access_token",
@@ -148,6 +146,8 @@ async def login_user(
 
 @users_router.post("/logout", status_code=HTTPStatus.NO_CONTENT)
 async def logout_user(response: Response):
+    # It's safer to set the cookie to an invalid value rather than deleting it.
+    # See https://learn.microsoft.com/en-us/previous-versions/aspnet/ms178195(v=vs.100)
     response.set_cookie(
         key="access_token",
         value=None,
@@ -164,7 +164,7 @@ async def request_email_verification(
     email_service: EmailService = Depends(get_email_service),
     user: dict[str, any] = Depends(get_logged_user),
 ):
-    verification_code = uuid.uuid4()
+    verification_code = uuid4()
 
     content = {
         "verificationCode": verification_code,
@@ -192,7 +192,7 @@ async def request_email_verification(
 
 @users_router.post("/verify/{code}", response_model=UserResponse)
 async def verify_email(
-    code: uuid.UUID,
+    code: UUID,
     database: Database = Depends(get_database),
     user: dict[str, any] = Depends(get_logged_user),
     config: Config = Depends(get_config),
@@ -220,7 +220,7 @@ async def verify_email(
         {"_id": user["_id"]},
         {
             "$set": {"verified": True, "updatedAt": datetime.now()},
-            "$unset": {"verificationCode": "", "verificationCodeIat": ""},
+            "$unset": {"verificationCode": None, "verificationCodeIat": None},
         },
         return_document=ReturnDocument.AFTER,
     )
@@ -235,7 +235,7 @@ async def request_password_reset(
     email_service: EmailService = Depends(get_email_service),
     user: dict[str, any] = Depends(get_logged_user),
 ):
-    reset_code = uuid.uuid4()
+    reset_code = uuid4()
 
     content = {
         "resetCode": reset_code,
@@ -263,7 +263,7 @@ async def request_password_reset(
 
 @users_router.post("/password-reset/{code}", status_code=HTTPStatus.NO_CONTENT)
 async def reset_password(
-    code: uuid.UUID,
+    code: UUID,
     body: ResetPasswordRequest,
     response: Response,
     database: Database = Depends(get_database),
@@ -297,7 +297,7 @@ async def reset_password(
         {"_id": user["_id"]},
         {
             "$set": {"passwordHash": password_hash, "updatedAt": updated_at},
-            "$unset": {"resetCode": "", "resetCodeIat": ""},
+            "$unset": {"resetCode": None, "resetCodeIat": None},
         },
     )
 
