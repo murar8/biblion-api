@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from app.models.database import User
+
 
 class UserResponse(BaseModel):
     id: UUID
@@ -16,8 +18,5 @@ class UserResponse(BaseModel):
     updatedAt: datetime
 
     @staticmethod
-    def from_mongo(user: dict[str, any]) -> UserResponse:
-        user["id"] = user.pop("_id")
-        user["createdAt"] = user.pop("createdAt").isoformat()
-        user["updatedAt"] = user.pop("updatedAt").isoformat()
-        return UserResponse(**user)
+    def from_mongo(user: User) -> UserResponse:
+        return UserResponse(**user.dict())

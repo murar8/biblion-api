@@ -1,17 +1,15 @@
+import asyncio
 from datetime import datetime
 from http import HTTPStatus
 
-import pymongo
 from fastapi import APIRouter, Depends, HTTPException
-from pymongo import ReturnDocument
-from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
 from app.access_token import AccessToken
+from app.models.database import Post, User
 from app.models.posts_requests import CreatePostRequest, GetPostsParams
 from app.models.posts_responses import PaginatedResponse, PostResponse
 from app.providers.access_token import get_access_token
-from app.providers.database import get_database
 from app.providers.logged_user import get_logged_user
 from app.util.shortid import generate_shortid
 
@@ -19,8 +17,8 @@ posts_router = APIRouter()
 
 
 @posts_router.get("/{post_id}", response_model=PostResponse)
-async def get_post(post_id: str, database: Database = Depends(get_database)):
-    post = await database.posts.find_one({"_id": post_id})
+async def get_post(post_id: str):
+    post = await Post.get(post_id)
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
@@ -29,52 +27,35 @@ async def get_post(post_id: str, database: Database = Depends(get_database)):
 
 
 @posts_router.get("/", response_model=PaginatedResponse[PostResponse])
-async def get_posts(
-    query: GetPostsParams = Depends(), database: Database = Depends(get_database)
-):
+async def get_posts(query: GetPostsParams = Depends()):
     find = {}
 
-    if query.ownerId:
-        find["ownerId"] = {"$eq": query.ownerId}
+    if query.creatorId:
+        find["creator"] = {"$eq": query.creatorId}
     if query.language:
         find["language"] = {"$eq": query.language}
 
-    total_count = await database.posts.count_documents(find)
-
-    cursor = database.posts.find(find)
-
     # We want the posts to always be sorted in a deterministic order to
     # preserve pagination.
-    cursor.sort(
-        [
-            ("updatedAt", pymongo.DESCENDING),
-            ("createdAt", pymongo.DESCENDING),
-            ("_id", pymongo.ASCENDING),
-        ]
+    sort = ["-updatedAt", "-createdAt", "+id"]
+
+    data, total_count = await asyncio.gather(
+        Post.find(find).sort(sort).skip(query.skip).limit(query.limit).to_list(),
+        Post.find(find).count(),
     )
 
-    cursor.skip(query.skip)
-    cursor.limit(query.limit)
+    posts = list(map(PostResponse.from_mongo, data))
+    has_more = total_count - query.skip - query.limit > 0
 
-    data: list[PostResponse] = []
-
-    async for post in cursor:
-        data.append(PostResponse.from_mongo(post))
-
-    return PaginatedResponse(
-        data=data,
-        hasMore=total_count - query.skip - query.limit > 0,
-        totalCount=total_count,
-    )
+    return PaginatedResponse(data=posts, hasMore=has_more, totalCount=total_count)
 
 
 @posts_router.post("/", response_model=PostResponse, status_code=HTTPStatus.CREATED)
 async def create_post(
     body: CreatePostRequest,
-    user: dict[str, any] = Depends(get_logged_user),
-    database: Database = Depends(get_database),
+    user: User = Depends(get_logged_user),
 ):
-    if not user["verified"]:
+    if not user.verified:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED, detail="User not verified."
         )
@@ -85,20 +66,19 @@ async def create_post(
         post_id = generate_shortid()
         created_at = datetime.utcnow()
 
-        document = {
-            "_id": post_id,
-            "ownerId": user["_id"],
-            "createdAt": created_at,
-            "updatedAt": created_at,
-            **body.dict(),
-        }
+        post = Post(
+            id=post_id,
+            creator=user.id,
+            createdAt=created_at,
+            updatedAt=created_at,
+            **body.dict()
+        )
 
         try:
-            await database.posts.insert_one(document=document)
+            await post.insert()
         except DuplicateKeyError:
             continue
 
-        post = await database.posts.find_one({"_id": post_id})
         return PostResponse.from_mongo(post)
 
 
@@ -107,24 +87,24 @@ async def update_post(
     post_id: str,
     body: CreatePostRequest,
     jwt: AccessToken = Depends(get_access_token),
-    database: Database = Depends(get_database),
 ):
-    post = await database.posts.find_one({"_id": post_id})
+    post = await Post.get(post_id)
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
 
-    if post["ownerId"] != jwt.sub:
+    if post.creator.ref.id != jwt.sub:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail="Current user is not the owner of the post.",
         )
 
-    post = await database.posts.find_one_and_update(
-        {"_id": post_id},
-        {"$set": {**body.dict(), "updatedAt": datetime.utcnow()}},
-        return_document=ReturnDocument.AFTER,
-    )
+    post.content = body.content
+    post.name = body.name
+    post.language = body.language
+    post.updatedAt = datetime.utcnow()
+
+    await post.save()
 
     return PostResponse.from_mongo(post)
 
@@ -133,17 +113,16 @@ async def update_post(
 async def delete_post(
     post_id: str,
     jwt: AccessToken = Depends(get_access_token),
-    database: Database = Depends(get_database),
 ):
-    post = await database.posts.find_one({"_id": post_id})
+    post = await Post.get(post_id)
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
 
-    if post["ownerId"] != jwt.sub:
+    if post.creator.ref.id != jwt.sub:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail="Current user is not the owner of the post.",
         )
 
-    await database.posts.delete_one({"_id": post_id})
+    await post.delete()

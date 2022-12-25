@@ -423,7 +423,8 @@ disable=raw-checker-failed,
         missing-function-docstring,
         too-few-public-methods,
         too-many-arguments,
-        fixme
+        fixme,
+        too-many-ancestors
 
 
 # Enable the message, report, category or checker with the given id(s). You can

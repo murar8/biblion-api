@@ -7,6 +7,8 @@ from uuid import UUID
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
+from app.models.database import Post
+
 T = TypeVar("T")
 
 
@@ -26,7 +28,7 @@ class PaginatedResponse(GenericModel, Generic[T]):
 
 class PostResponse(BaseModel):
     id: str
-    ownerId: UUID
+    creatorId: UUID
     name: Optional[str]
     language: Optional[str]
     content: str
@@ -34,6 +36,5 @@ class PostResponse(BaseModel):
     updatedAt: datetime
 
     @staticmethod
-    def from_mongo(post: dict[str, any]) -> PostResponse:
-        post["id"] = post.pop("_id")
-        return PostResponse(**post)
+    def from_mongo(post: Post) -> PostResponse:
+        return PostResponse(**post.dict(), creatorId=post.creator.ref.id)

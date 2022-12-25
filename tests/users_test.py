@@ -23,7 +23,7 @@ async def test_get_user_non_existent(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_brown"}], indirect=True)
 async def test_get_current_user(app_client: AsyncClient):
     response = await app_client.get("v1/users/me")
     json = response.json()
@@ -75,7 +75,7 @@ async def test_create_user_invalid(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_brown"}], indirect=True)
 async def test_update_user(app_client: AsyncClient):
     body = {"email": "mrbrown2@user.com"}
 
@@ -96,7 +96,7 @@ async def test_update_user(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_brown"}], indirect=True)
 async def test_update_user_unset_name(app_client: AsyncClient):
     body = {"name": ""}
 
@@ -111,7 +111,7 @@ async def test_update_user_unset_name(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_brown"}], indirect=True)
 async def test_update_user_unauthorized(app_client: AsyncClient):
     response = await app_client.patch(
         "v1/users/34b8028f-a220-498e-85c9-7304e44cb272",
@@ -174,7 +174,7 @@ async def test_login_user_non_existent(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_brown"}], indirect=True)
 async def test_logout_user(app_client: AsyncClient):
     response = await app_client.post("v1/users/logout")
     assert response.status_code == HTTPStatus.NO_CONTENT
@@ -184,7 +184,7 @@ async def test_logout_user(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_brown"}], indirect=True)
 async def test_request_verification_code(app_client: AsyncClient):
     response = await app_client.post("v1/users/verify")
     assert response.status_code == HTTPStatus.NO_CONTENT
@@ -201,7 +201,7 @@ async def test_request_verification_code(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_red"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_red"}], indirect=True)
 async def test_verify_user(app_client: AsyncClient):
     response = await app_client.post(
         "v1/users/verify/03d06d59-5fd5-4c49-bafe-91bab21d1391"
@@ -214,7 +214,7 @@ async def test_verify_user(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_brown"}], indirect=True)
 async def test_verify_user_no_request_found(app_client: AsyncClient):
     response = await app_client.post(
         "v1/users/verify/060ac1bf-4377-4075-b83a-322c0f3f3dfd"
@@ -223,7 +223,7 @@ async def test_verify_user_no_request_found(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_brown"}], indirect=True)
 async def test_request_password_reset(app_client: AsyncClient):
     response = await app_client.post("v1/users/password-reset")
     assert response.status_code == HTTPStatus.NO_CONTENT
@@ -240,7 +240,7 @@ async def test_request_password_reset(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_red"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_red"}], indirect=True)
 async def test_reset_password(app_client: AsyncClient):
     body = {"password": "hastanoche"}
     response = await app_client.post(
@@ -269,7 +269,7 @@ async def test_reset_password(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
+@pytest.mark.parametrize("app_client", [{"logged_user": "mr_brown"}], indirect=True)
 async def test_reset_password_no_request_found(app_client: AsyncClient):
     body = {"password": "hastanoche"}
     response = await app_client.post(

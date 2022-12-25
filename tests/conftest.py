@@ -1,12 +1,14 @@
 import asyncio
 
 import pytest_asyncio
+from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app import app
 from app.config import Config
-from tests.seed import posts_seed, users_seed
+from tests.seeds import posts_seed, users_seed
+from tests.test_access_tokens import test_access_tokens
 
 
 # Redefine the event_loop fixture to have a session scope.
@@ -33,47 +35,18 @@ async def app_db():
 
 @pytest_asyncio.fixture()
 async def app_client(request):
-    client = AsyncClient(
-        app=app,
-        base_url="https://biblion.com",
-        follow_redirects=True,
-    )
+    client_config = {
+        "app": app,
+        "base_url": "https://biblion.io",
+        "follow_redirects": True,
+    }
 
-    if hasattr(request, "param") and "access_token" in request.param:
-        match request.param["access_token"]:
-            case "mr_brown":
-                client.cookies.set(
-                    "access_token",
-                    # iss: https://api.biblion.com
-                    # sub: f4c8e142-5a8e-4759-9eec-74d9139dcfd5
-                    # aud: https://api.biblion.com
-                    # iat: 1667766384.0424864
-                    # exp: 2667766384.042486
-                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FwaS5ia"
-                    "WJsaW9uLmNvbSIsInN1YiI6ImY0YzhlMTQyLTVhOGUtNDc1OS05ZWVjLTc0ZDkxMzl"
-                    "kY2ZkNSIsImF1ZCI6Imh0dHBzOi8vYXBpLmJpYmxpb24uY29tIiwiaWF0IjoxNjY3N"
-                    "zY2Mzg0LjA0MjQ4NjQsImV4cCI6MjY2Nzc2NjM4NC4wNDI0ODZ9.Dnk6k40e56or2u"
-                    "79rPJelZnYwJHY5QoLwN94kkFMcP0",
-                )
+    # Using LifespanManager to run the startup and shutdown events.
+    # See https://github.com/tiangolo/fastapi/issues/2003#issuecomment-801140731
 
-            case "mr_red":
-                client.cookies.set(
-                    "access_token",
-                    # iss: https://api.biblion.com
-                    # sub: af71f215-c3f8-441f-9498-e75f8dfbcf4b
-                    # aud: https://api.biblion.com
-                    # iat: 1667766384.0424864
-                    # exp: 2667766384.042486
-                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FwaS5ia"
-                    "WJsaW9uLmNvbSIsInN1YiI6ImFmNzFmMjE1LWMzZjgtNDQxZi05NDk4LWU3NWY4ZGZ"
-                    "iY2Y0YiIsImF1ZCI6Imh0dHBzOi8vYXBpLmJpYmxpb24uY29tIiwiaWF0IjoxNjY3N"
-                    "zY2Mzg0LjA0MjQ4NjQsImV4cCI6MjY2Nzc2NjM4NC4wNDI0ODZ9.4LRHOR2oQ9G_Dl"
-                    "p7q5uSMci195sdY8KflWcU4uE2e2g",
-                )
+    async with AsyncClient(**client_config) as client, LifespanManager(app):
+        if hasattr(request, "param") and "logged_user" in request.param:
+            access_token = test_access_tokens[request.param["logged_user"]]
+            client.cookies.set("access_token", access_token)
 
-            case _:
-                raise Exception(f"Invalid token: '{request.param['access_token']}'")
-
-    yield client
-
-    await client.aclose()
+        yield client

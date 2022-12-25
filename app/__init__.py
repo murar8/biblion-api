@@ -1,11 +1,17 @@
 import os
 from http import HTTPStatus
 
+from beanie import init_beanie
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import ValidationError
+from pymongo.database import Database
 
+from app.config import Config
+from app.models.database import Post, User
+from app.providers.config import get_config
 from app.routers.posts_router import posts_router
 from app.routers.users_router import users_router
 
@@ -36,6 +42,14 @@ async def validation_exception_handler(_, exception: ValidationError):
     return JSONResponse(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY, content={"detail": errors}
     )
+
+
+@app.on_event("startup")
+async def init():
+    config: Config = get_config()
+    client = AsyncIOMotorClient(config.database.url, uuidRepresentation="standard")
+    database: Database = client[config.database.name]
+    await init_beanie(database=database, document_models=[User, Post])
 
 
 router = APIRouter(prefix="/v1")

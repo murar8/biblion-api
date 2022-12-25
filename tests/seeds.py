@@ -5,7 +5,7 @@ from uuid import UUID
 posts_seed = [
     {
         "_id": "a46yh2d3",
-        "ownerId": UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
+        "creator": UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
         "content": "console.log('Hello, world!')",
         "name": "hello.js",
         "language": "js",
@@ -14,7 +14,7 @@ posts_seed = [
     },
     {
         "_id": "bdu764rt",
-        "ownerId": UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
+        "creator": UUID("f4c8e142-5a8e-4759-9eec-74d9139dcfd5"),
         "content": "Hello, world!",
         "name": "hello.txt",
         "language": "txt",
@@ -23,7 +23,7 @@ posts_seed = [
     },
     {
         "_id": "ctrdg53d",
-        "ownerId": UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
+        "creator": UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
         "content": "console.log('Hello, world!')",
         "name": "test.ts",
         "language": "ts",
@@ -32,7 +32,7 @@ posts_seed = [
     },
     {
         "_id": "d7yhmbr5",
-        "ownerId": UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
+        "creator": UUID("34b8028f-a220-498e-85c9-7304e44cb272"),
         "content": "Hello, world!",
         "name": "hi.txt",
         "language": "txt",
@@ -48,7 +48,7 @@ users_seed = [
         "email": "mrbrown@user.com",
         "name": "mr_brown",
         "passwordHash": (
-            # pw: "hastasiempre"
+            # password: "hastasiempre"
             b"$2b$12$AccWeQEg2szEkty9YCWLa.1Y2snNhc.DTmk97Qveg8hpDgm9.O2kG"
         ),
         "verified": True,
@@ -60,7 +60,7 @@ users_seed = [
         "email": "mrgreen@user.com",
         "name": "mr_green",
         "passwordHash": (
-            # pw: "hastanunca"
+            # password: "hastanunca"
             b"$2b$12$tToXPOgFqXrqjuIdCXODZeXK0IfL.kz7sZ1/SxWRvN3Zn.TZYe7MW"
         ),
         "verified": False,
@@ -72,7 +72,7 @@ users_seed = [
         "email": "mrred@user.com",
         "name": "mr_red",
         "passwordHash": (
-            # pw: "hastacuando"
+            # password: "hastacuando"
             b"$2b$12$yp9ipcT4VdpkMmwSNTaoied19ElSKuKtjeONj.7.nb5HUZllHvMx."
         ),
         "verified": False,

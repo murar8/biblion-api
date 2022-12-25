@@ -5,12 +5,14 @@ name = "pypi"
 
 [packages]
 bcrypt = "*"
+beanie = "*"
 fastapi = { extras = ["all"], version = "*" }
 jinja2 = "*"
 motor = "*"
 pyjwt = { extras = ["crypto"], version = "*" }
 
 [dev-packages]
+asgi-lifespan = "*"
 black = "*"
 httpx = "*"
 pre-commit = "*"

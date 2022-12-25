@@ -12,7 +12,7 @@ PAGE_SIZE_LIMIT = 32
 class GetPostsParams(BaseModel):
     skip: Optional[NonNegativeInt] = 0
     limit: Optional[conint(ge=0, le=PAGE_SIZE_LIMIT)] = 0
-    ownerId: Optional[UUID]
+    creatorId: Optional[UUID]
     language: Optional[constr(max_length=LANGUAGE_MAX_LEN)]
 
 
