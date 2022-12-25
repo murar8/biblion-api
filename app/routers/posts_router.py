@@ -12,6 +12,7 @@ from app.models.posts_requests import CreatePostRequest, GetPostsParams
 from app.models.posts_responses import PaginatedResponse, PostResponse
 from app.providers.access_token import get_access_token
 from app.providers.database import get_database
+from app.providers.logged_user import get_logged_user
 from app.util.shortid import generate_shortid
 
 posts_router = APIRouter()
@@ -70,9 +71,14 @@ async def get_posts(
 @posts_router.post("/", response_model=PostResponse, status_code=HTTPStatus.CREATED)
 async def create_post(
     body: CreatePostRequest,
-    jwt: AccessToken = Depends(get_access_token),
+    user: dict[str, any] = Depends(get_logged_user),
     database: Database = Depends(get_database),
 ):
+    if not user["verified"]:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail="User not verified."
+        )
+
     # We use short ids to make it easy for users to share posts by id, so we
     # have to take into account the (unlikely) possibility of having two ids clashing.
     while True:
@@ -81,7 +87,7 @@ async def create_post(
 
         document = {
             "_id": post_id,
-            "ownerId": jwt.sub,
+            "ownerId": user["_id"],
             "createdAt": created_at,
             "updatedAt": created_at,
             **body.dict(),
@@ -106,10 +112,13 @@ async def update_post(
     post = await database.posts.find_one({"_id": post_id})
 
     if not post:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
 
     if post["ownerId"] != jwt.sub:
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="Current user is not the owner of the post.",
+        )
 
     post = await database.posts.find_one_and_update(
         {"_id": post_id},
@@ -129,9 +138,12 @@ async def delete_post(
     post = await database.posts.find_one({"_id": post_id})
 
     if not post:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
 
     if post["ownerId"] != jwt.sub:
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="Current user is not the owner of the post.",
+        )
 
     await database.posts.delete_one({"_id": post_id})

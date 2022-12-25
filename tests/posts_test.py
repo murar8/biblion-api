@@ -90,6 +90,13 @@ async def test_create_post(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("app_client", [{"access_token": "mr_red"}], indirect=True)
+async def test_create_post_unverified(app_client: AsyncClient):
+    response = await app_client.post("v1/posts", json={"content": "Test"})
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("app_client", [{"access_token": "mr_brown"}], indirect=True)
 async def test_update_post(app_client: AsyncClient):
     now = datetime.utcnow()
