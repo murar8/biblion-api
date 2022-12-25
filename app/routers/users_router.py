@@ -11,29 +11,29 @@ from pymongo.errors import DuplicateKeyError
 from app.access_token import AccessToken
 from app.config import Config
 from app.email_service import EmailService
-from app.models.database import User
-from app.models.users_requests import (
+from app.models.documents import UserDocument
+from app.models.requests import (
     CreateUserRequest,
     LoginUserRequest,
     ResetPasswordRequest,
     UpdateUserRequest,
 )
-from app.models.users_responses import UserResponse
-from app.providers.config import get_config
-from app.providers.email_service import get_email_service
-from app.providers.logged_user import get_logged_user
+from app.models.responses import UserResponse
+from app.providers.use_config import use_config
+from app.providers.use_email_service import use_email_service
+from app.providers.use_logged_user import use_logged_user
 
 users_router = APIRouter()
 
 
 @users_router.get("/me", response_model=UserResponse)
-async def get_current_user(user: User = Depends(get_logged_user)):
+async def get_current_user(user: UserDocument = Depends(use_logged_user)):
     return UserResponse.from_mongo(user)
 
 
 @users_router.get("/{user_id}", response_model=UserResponse)
 async def get_user(user_id: UUID):
-    user = await User.get(user_id)
+    user = await UserDocument.get(user_id)
 
     if not user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="User not found.")
@@ -49,7 +49,7 @@ async def create_user(
     salt = bcrypt.gensalt()
     password_hash = bcrypt.hashpw(body.password.encode(), salt)
 
-    user = User(
+    user = UserDocument(
         id=uuid4(),
         email=body.email,
         name=body.name,
@@ -71,7 +71,9 @@ async def create_user(
 
 @users_router.patch("/{user_id}", response_model=UserResponse)
 async def update_user(
-    user_id: UUID, body: UpdateUserRequest, user: User = Depends(get_logged_user)
+    user_id: UUID,
+    body: UpdateUserRequest,
+    user: UserDocument = Depends(use_logged_user),
 ):
     if user_id != user.id:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
@@ -99,9 +101,9 @@ async def update_user(
 async def login_user(
     body: LoginUserRequest,
     response: Response,
-    config: Config = Depends(get_config),
+    config: Config = Depends(use_config),
 ):
-    user = await User.find_one(
+    user = await UserDocument.find_one(
         {"email": body.email} if body.email else {"name": body.name}
     )
 
@@ -139,9 +141,9 @@ async def logout_user(response: Response):
 
 @users_router.post("/verify", status_code=HTTPStatus.NO_CONTENT)
 async def request_email_verification(
-    config: Config = Depends(get_config),
-    email_service: EmailService = Depends(get_email_service),
-    user: User = Depends(get_logged_user),
+    config: Config = Depends(use_config),
+    email_service: EmailService = Depends(use_email_service),
+    user: UserDocument = Depends(use_logged_user),
 ):
     user.verificationCode = uuid4()
     user.verificationCodeIat = datetime.now()
@@ -168,8 +170,8 @@ async def request_email_verification(
 @users_router.post("/verify/{code}", response_model=UserResponse)
 async def verify_email(
     code: UUID,
-    user: User = Depends(get_logged_user),
-    config: Config = Depends(get_config),
+    user: UserDocument = Depends(use_logged_user),
+    config: Config = Depends(use_config),
 ):
     if not user.verificationCode or not user.verificationCodeIat:
         raise HTTPException(
@@ -202,9 +204,9 @@ async def verify_email(
 
 @users_router.post("/password-reset", status_code=HTTPStatus.NO_CONTENT)
 async def request_password_reset(
-    config: Config = Depends(get_config),
-    email_service: EmailService = Depends(get_email_service),
-    user: User = Depends(get_logged_user),
+    config: Config = Depends(use_config),
+    email_service: EmailService = Depends(use_email_service),
+    user: UserDocument = Depends(use_logged_user),
 ):
     user.verificationCode = uuid4()
     user.verificationCodeIat = datetime.now()
@@ -233,8 +235,8 @@ async def reset_password(
     code: UUID,
     body: ResetPasswordRequest,
     response: Response,
-    user: User = Depends(get_logged_user),
-    config: Config = Depends(get_config),
+    user: UserDocument = Depends(use_logged_user),
+    config: Config = Depends(use_config),
 ):
     if not user.resetCode or not user.resetCodeIat:
         raise HTTPException(

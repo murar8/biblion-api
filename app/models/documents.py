@@ -7,7 +7,7 @@ from pydantic import EmailStr, Field
 from pymongo import IndexModel
 
 
-class User(Document):
+class UserDocument(Document):
     id: UUID = Field(default_factory=uuid4)
     email: EmailStr
     passwordHash: bytes
@@ -40,7 +40,7 @@ class User(Document):
         ]
 
 
-class Post(Document):
+class PostDocument(Document):
     id: str
     content: str
     name: Optional[str]
@@ -49,7 +49,7 @@ class Post(Document):
     createdAt: datetime
     updatedAt: datetime
 
-    creator: Link[User]
+    creator: Link[UserDocument]
 
     class Settings:
         name = "posts"

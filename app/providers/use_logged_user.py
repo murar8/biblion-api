@@ -3,12 +3,12 @@ from http import HTTPStatus
 from fastapi import Depends, HTTPException
 
 from app.access_token import AccessToken
-from app.models.database import User
-from app.providers.access_token import get_access_token
+from app.models.documents import UserDocument
+from app.providers.use_access_token import use_access_token
 
 
-async def get_logged_user(jwt: AccessToken = Depends(get_access_token)):
-    user = await User.get(jwt.sub)
+async def use_logged_user(jwt: AccessToken = Depends(use_access_token)):
+    user = await UserDocument.get(jwt.sub)
 
     if not user:
         raise HTTPException(

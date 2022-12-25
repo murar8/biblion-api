@@ -6,11 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from pymongo.errors import DuplicateKeyError
 
 from app.access_token import AccessToken
-from app.models.database import Post, User
-from app.models.posts_requests import CreatePostRequest, GetPostsParams
-from app.models.posts_responses import PaginatedResponse, PostResponse
-from app.providers.access_token import get_access_token
-from app.providers.logged_user import get_logged_user
+from app.models.documents import PostDocument, UserDocument
+from app.models.requests import CreatePostRequest, GetPostsParams
+from app.models.responses import PaginatedResponse, PostResponse
+from app.providers.use_access_token import use_access_token
+from app.providers.use_logged_user import use_logged_user
 from app.util.shortid import generate_shortid
 
 posts_router = APIRouter()
@@ -18,7 +18,7 @@ posts_router = APIRouter()
 
 @posts_router.get("/{post_id}", response_model=PostResponse)
 async def get_post(post_id: str):
-    post = await Post.get(post_id)
+    post = await PostDocument.get(post_id)
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
@@ -40,8 +40,12 @@ async def get_posts(query: GetPostsParams = Depends()):
     sort = ["-updatedAt", "-createdAt", "+id"]
 
     data, total_count = await asyncio.gather(
-        Post.find(find).sort(sort).skip(query.skip).limit(query.limit).to_list(),
-        Post.find(find).count(),
+        PostDocument.find(find)
+        .sort(sort)
+        .skip(query.skip)
+        .limit(query.limit)
+        .to_list(),
+        PostDocument.find(find).count(),
     )
 
     posts = list(map(PostResponse.from_mongo, data))
@@ -53,7 +57,7 @@ async def get_posts(query: GetPostsParams = Depends()):
 @posts_router.post("/", response_model=PostResponse, status_code=HTTPStatus.CREATED)
 async def create_post(
     body: CreatePostRequest,
-    user: User = Depends(get_logged_user),
+    user: UserDocument = Depends(use_logged_user),
 ):
     if not user.verified:
         raise HTTPException(
@@ -66,7 +70,7 @@ async def create_post(
         post_id = generate_shortid()
         created_at = datetime.utcnow()
 
-        post = Post(
+        post = PostDocument(
             id=post_id,
             creator=user.id,
             createdAt=created_at,
@@ -86,9 +90,9 @@ async def create_post(
 async def update_post(
     post_id: str,
     body: CreatePostRequest,
-    jwt: AccessToken = Depends(get_access_token),
+    jwt: AccessToken = Depends(use_access_token),
 ):
-    post = await Post.get(post_id)
+    post = await PostDocument.get(post_id)
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
@@ -112,9 +116,9 @@ async def update_post(
 @posts_router.delete("/{post_id}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_post(
     post_id: str,
-    jwt: AccessToken = Depends(get_access_token),
+    jwt: AccessToken = Depends(use_access_token),
 ):
-    post = await Post.get(post_id)
+    post = await PostDocument.get(post_id)
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")

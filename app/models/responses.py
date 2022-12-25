@@ -7,7 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
-from app.models.database import Post
+from app.models.documents import PostDocument, UserDocument
 
 T = TypeVar("T")
 
@@ -36,5 +36,18 @@ class PostResponse(BaseModel):
     updatedAt: datetime
 
     @staticmethod
-    def from_mongo(post: Post) -> PostResponse:
+    def from_mongo(post: PostDocument) -> PostResponse:
         return PostResponse(**post.dict(), creatorId=post.creator.ref.id)
+
+
+class UserResponse(BaseModel):
+    id: UUID
+    email: str
+    name: Optional[str]
+    verified: bool
+    createdAt: datetime
+    updatedAt: datetime
+
+    @staticmethod
+    def from_mongo(user: UserDocument) -> UserResponse:
+        return UserResponse(**user.dict())

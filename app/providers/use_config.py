@@ -4,5 +4,5 @@ from app.config import Config
 
 
 @lru_cache()
-def get_config():
+def use_config():
     return Config()

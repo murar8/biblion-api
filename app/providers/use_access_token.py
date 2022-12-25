@@ -3,12 +3,12 @@ from http import HTTPStatus
 from fastapi import Cookie, Depends, HTTPException
 from jwt import DecodeError, ExpiredSignatureError
 
-from app.providers.config import Config, get_config
+from app.providers.use_config import Config, use_config
 from app.access_token import AccessToken
 
 
-def get_access_token(
-    config: Config = Depends(get_config),
+def use_access_token(
+    config: Config = Depends(use_config),
     access_token: str | None = Cookie(default=None),
 ):
     if access_token is None:
