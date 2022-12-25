@@ -11,6 +11,7 @@ class UserDocument(Document):
     id: UUID = Field(default_factory=uuid4)
     email: EmailStr
     passwordHash: bytes
+    passwordUpdatedAt: Optional[datetime]
     name: Optional[str]
     verified: Optional[bool]
 

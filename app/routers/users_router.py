@@ -234,7 +234,6 @@ async def request_password_reset(
 async def reset_password(
     code: UUID,
     body: ResetPasswordRequest,
-    response: Response,
     user: UserDocument = Depends(use_logged_user),
     config: Config = Depends(use_config),
 ):
@@ -260,16 +259,9 @@ async def reset_password(
     salt = bcrypt.gensalt()
 
     user.passwordHash = bcrypt.hashpw(body.password.encode(), salt)
+    user.passwordUpdatedAt = datetime.now()
     user.updatedAt = datetime.now()
     user.resetCode = None
     user.resetCodeIat = None
 
     await user.save()
-
-    response.set_cookie(
-        key="access_token",
-        value=None,
-        secure=True,
-        httponly=True,
-        expires=datetime.now(),
-    )

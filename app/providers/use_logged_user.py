@@ -16,4 +16,10 @@ async def use_logged_user(jwt: AccessToken = Depends(use_access_token)):
             detail="The provided token does not match any existing user.",
         )
 
+    if user.passwordUpdatedAt and user.passwordUpdatedAt > jwt.iat:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="The provided token has been invalidated.",
+        )
+
     return user

@@ -1,3 +1,4 @@
+import asyncio
 import os
 from datetime import datetime
 from http import HTTPStatus
@@ -259,6 +260,8 @@ async def test_reset_password(app_client: AsyncClient):
         "v1/users/login", json={"name": "mr_red", "password": "hastanoche"}
     )
     assert response.status_code == HTTPStatus.OK
+
+    await asyncio.sleep(1)  # Wait a moment for the token to be valid.
 
     # Reset code should only be valid for a single operation.
 
