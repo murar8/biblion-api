@@ -6,6 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
+from typing_extensions import Self
 
 from app.models.documents import PostDocument, UserDocument
 
@@ -26,6 +27,21 @@ class PaginatedResponse(GenericModel, Generic[T]):
         return f"Paginated{params[0].__name__}"
 
 
+class GetPostsItem(BaseModel):
+    id: str
+    name: Optional[str]
+    language: Optional[str]
+    createdAt: datetime
+    updatedAt: datetime
+
+    @staticmethod
+    def from_mongo(post: PostDocument) -> Self:
+        return GetPostsItem(**post.dict())
+
+
+GetPostsResponse = PaginatedResponse[GetPostsItem]
+
+
 class PostResponse(BaseModel):
     id: str
     creatorId: UUID
@@ -36,7 +52,7 @@ class PostResponse(BaseModel):
     updatedAt: datetime
 
     @staticmethod
-    def from_mongo(post: PostDocument) -> PostResponse:
+    def from_mongo(post: PostDocument) -> Self:
         return PostResponse(**post.dict(), creatorId=post.creator.ref.id)
 
 
@@ -49,5 +65,5 @@ class UserResponse(BaseModel):
     updatedAt: datetime
 
     @staticmethod
-    def from_mongo(user: UserDocument) -> UserResponse:
+    def from_mongo(user: UserDocument) -> Self:
         return UserResponse(**user.dict())

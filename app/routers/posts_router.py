@@ -8,7 +8,12 @@ from pymongo.errors import DuplicateKeyError
 from app.access_token import AccessToken
 from app.models.documents import PostDocument, UserDocument
 from app.models.requests import CreatePostRequest, GetPostsParams
-from app.models.responses import PaginatedResponse, PostResponse
+from app.models.responses import (
+    GetPostsItem,
+    GetPostsResponse,
+    PaginatedResponse,
+    PostResponse,
+)
 from app.providers.use_access_token import use_access_token
 from app.providers.use_logged_user import use_logged_user
 from app.util.shortid import generate_shortid
@@ -26,7 +31,7 @@ async def get_post(post_id: str):
     return PostResponse.from_mongo(post)
 
 
-@posts_router.get("/", response_model=PaginatedResponse[PostResponse])
+@posts_router.get("/", response_model=GetPostsResponse)
 async def get_posts(query: GetPostsParams = Depends()):
     find = {}
 
@@ -48,7 +53,7 @@ async def get_posts(query: GetPostsParams = Depends()):
         PostDocument.find(find).count(),
     )
 
-    posts = list(map(PostResponse.from_mongo, data))
+    posts = list(map(GetPostsItem.from_mongo, data))
     has_more = total_count - query.skip - query.limit > 0
 
     return PaginatedResponse(data=posts, hasMore=has_more, totalCount=total_count)
