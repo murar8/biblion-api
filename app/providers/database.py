@@ -11,7 +11,18 @@ async def get_database(config: Config = Depends(get_config)) -> Database:
     database: Database = client[config.database.name]
 
     await database.users.create_indexes(
-        [IndexModel("name", unique=True), IndexModel("email", unique=True)]
+        [
+            IndexModel(
+                "name",
+                unique=True,
+                partialFilterExpression={"name": {"$exists": True}},
+            ),
+            IndexModel(
+                "email",
+                unique=True,
+                partialFilterExpression={"email": {"$exists": True}},
+            ),
+        ]
     )
 
     return database

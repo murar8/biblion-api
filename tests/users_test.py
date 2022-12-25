@@ -56,6 +56,17 @@ async def test_create_user_already_exists(app_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_create_user_empty_name_no_conflict(app_client: AsyncClient):
+    body = {"email": "mrblue@user.com", "password": "banana"}
+    response = await app_client.post("v1/users", json=body)
+    assert response.status_code == HTTPStatus.CREATED
+
+    body = {"email": "mrpurple@user.com", "password": "banana"}
+    response = await app_client.post("v1/users", json=body)
+    assert response.status_code == HTTPStatus.CREATED
+
+
+@pytest.mark.asyncio
 async def test_create_user_invalid(app_client: AsyncClient):
     body = {"email": "testgmail.com", "name": "mr_bean", "password": "banana"}
     response = await app_client.post("v1/users", json=body)
