@@ -41,12 +41,12 @@ async def app_client(request):
         "follow_redirects": True,
     }
 
+    if hasattr(request, "param") and "logged_user" in request.param:
+        access_token = test_access_tokens[request.param["logged_user"]]
+        client_config["cookies"] = [("access_token", access_token)]
+
     # Using LifespanManager to run the startup and shutdown events.
     # See https://github.com/tiangolo/fastapi/issues/2003#issuecomment-801140731
 
     async with AsyncClient(**client_config) as client, LifespanManager(app):
-        if hasattr(request, "param") and "logged_user" in request.param:
-            access_token = test_access_tokens[request.param["logged_user"]]
-            client.cookies.set("access_token", access_token)
-
         yield client
