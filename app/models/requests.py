@@ -10,6 +10,7 @@ POST_CONTENT_MAX_LEN = 65536
 GET_POSTS_PAGE_SIZE_LIMIT = 32
 
 USER_NAME_MAX_LEN = 32
+USER_PASSWORD_MIN_LEN = 4
 USER_PASSWORD_MAX_LEN = 256
 
 
@@ -29,7 +30,7 @@ class CreatePostRequest(BaseModel):
 class CreateUserRequest(BaseModel):
     email: EmailStr
     name: Optional[constr(min_length=1, max_length=USER_NAME_MAX_LEN)]
-    password: constr(min_length=1, max_length=USER_PASSWORD_MAX_LEN)
+    password: constr(min_length=USER_PASSWORD_MIN_LEN, max_length=USER_PASSWORD_MAX_LEN)
 
 
 class UpdateUserRequest(BaseModel):
@@ -55,4 +56,4 @@ class LoginUserRequest(BaseModel):
 
 
 class ResetPasswordRequest(BaseModel):
-    password: constr(min_length=1)
+    password: constr(min_length=USER_PASSWORD_MIN_LEN, max_length=USER_PASSWORD_MAX_LEN)
