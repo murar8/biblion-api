@@ -25,6 +25,7 @@ class UserDocument(Document):
     updatedAt: datetime
 
     class Settings:
+        use_revision = True
         name = "users"
         indexes = [
             IndexModel(
@@ -53,4 +54,5 @@ class PostDocument(Document):
     creator: Link[UserDocument]
 
     class Settings:
+        use_revision = True
         name = "posts"
