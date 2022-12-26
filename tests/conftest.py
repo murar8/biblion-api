@@ -3,11 +3,9 @@ import asyncio
 import pytest_asyncio
 from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
-from motor.motor_asyncio import AsyncIOMotorClient
 
 from app import app
-from app.config import Config
-from tests.seeds import posts_seed, users_seed
+from tests.init_db import init_db
 from tests.test_access_tokens import test_access_tokens
 
 
@@ -18,19 +16,6 @@ def event_loop():
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
-
-
-@pytest_asyncio.fixture(autouse=True)
-async def app_db():
-    config = Config()
-    client = AsyncIOMotorClient(config.database.url, uuidRepresentation="standard")
-    database = client[config.database.name]
-
-    await client.drop_database(config.database.name)
-    await database.posts.insert_many(posts_seed)
-    await database.users.insert_many(users_seed)
-
-    yield database
 
 
 @pytest_asyncio.fixture()
@@ -49,4 +34,5 @@ async def app_client(request):
     # See https://github.com/tiangolo/fastapi/issues/2003#issuecomment-801140731
 
     async with AsyncClient(**client_config) as client, LifespanManager(app):
+        await init_db()
         yield client

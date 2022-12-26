@@ -26,6 +26,7 @@ class UserDocument(Document):
 
     class Settings:
         use_revision = True
+        validate_on_save = True
         name = "users"
         indexes = [
             IndexModel(
@@ -55,4 +56,5 @@ class PostDocument(Document):
 
     class Settings:
         use_revision = True
+        validate_on_save = True
         name = "posts"

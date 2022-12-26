@@ -16,7 +16,7 @@ async def test_get_post(app_client: AsyncClient):
     assert json["creatorId"] == "f4c8e142-5a8e-4759-9eec-74d9139dcfd5"
     assert json["content"] == "Hello, world!"
     assert json["name"] == "hello.txt"
-    assert json["language"] == "txt"
+    assert json["language"] is None
     assert datetime.fromisoformat(json["createdAt"])
     assert datetime.fromisoformat(json["updatedAt"])
 
@@ -66,7 +66,7 @@ async def test_get_posts_owner_id(app_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_posts_language(app_client: AsyncClient):
-    query = {"language": "ts"}
+    query = {"language": "tsx"}
     response = await app_client.get("v1/posts", params=query)
     json = response.json()
 

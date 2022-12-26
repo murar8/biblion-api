@@ -36,7 +36,7 @@ async def get_posts(query: GetPostsParams = Depends()):
     find = {}
 
     if query.creatorId:
-        find["creator"] = {"$eq": query.creatorId}
+        find["creator.$id"] = {"$eq": query.creatorId}
     if query.language:
         find["language"] = {"$eq": query.language}
 
