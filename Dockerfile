@@ -1,4 +1,7 @@
-FROM python:3.11-alpine
+# TODO: Using alpine works fine in 3.10 but fails using 3.11.
+# FROM python:3.11-alpine
+
+FROM python:3.11-slim
 
 ARG PORT
 ENV PORT=${PORT}
@@ -6,7 +9,7 @@ ENV PORT=${PORT}
 ARG VERSION
 ENV VERSION=${VERSION}
 
-RUN adduser -S python
+RUN useradd --system --no-create-home python
 
 RUN pip install --no-cache --upgrade pip && pip install --no-cache pipenv uvicorn
 
