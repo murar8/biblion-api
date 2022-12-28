@@ -1,6 +1,6 @@
 services:
   biblion-code:
-    image: mcr.microsoft.com/vscode/devcontainers/python:3.10
+    image: mcr.microsoft.com/vscode/devcontainers/python:3.11
     volumes: [./:/app:cached]
     depends_on: [mongo, mailhog]
     init: true

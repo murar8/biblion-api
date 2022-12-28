@@ -5,10 +5,12 @@ from uuid import UUID
 
 from app.models.documents import PostDocument, UserDocument
 
-# Note: This should be called after the app startup event is executed.
-
 
 async def init_db():
+    """
+    Initialize the test environment with some initial values.
+    Note: This should be called after the app startup event is executed.
+    """
     await PostDocument.delete_all()
     await UserDocument.delete_all()
 
