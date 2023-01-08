@@ -46,7 +46,6 @@ async def validation_exception_handler(_, exception: ValidationError):
 
 @app.on_event("startup")
 async def init():
-    print("init")
     config: Config = use_config()
     client = AsyncIOMotorClient(config.database.url, uuidRepresentation="standard")
     database: Database = client[config.database.name]
