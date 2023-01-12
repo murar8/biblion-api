@@ -208,8 +208,8 @@ async def request_password_reset(
     email_service: EmailService = Depends(use_email_service),
     user: UserDocument = Depends(use_logged_user),
 ):
-    user.verificationCode = uuid4()
-    user.verificationCodeIat = datetime.now()
+    user.resetCode = uuid4()
+    user.resetCodeIat = datetime.now()
 
     await user.save()
 
