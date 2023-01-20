@@ -53,11 +53,11 @@
         },
         "beanie": {
             "hashes": [
-                "sha256:3c016c5f226d6fcb1a603b93dc1f1dd17e350ca854e95ac7143cf076178a4309",
-                "sha256:de97c50adf510960e71a229433a084b2c79e62538d60c1823e2e487166410e7a"
+                "sha256:5f758785ce813838a0f25e171957afb6e70fa142dda937531427e0a530d03c64",
+                "sha256:a0711775051c72324fc4555120355da9a3c081d41db14ddaa8e9f368303436ef"
             ],
             "index": "pypi",
-            "version": "==1.16.8"
+            "version": "==1.17.0"
         },
         "certifi": {
             "hashes": [
@@ -1374,11 +1374,11 @@
         },
         "setuptools": {
             "hashes": [
-                "sha256:a78d01d1e2c175c474884671dde039962c9d74c7223db7369771fcf6e29ceeab",
-                "sha256:bd6eb2d6722568de6d14b87c44a96fac54b2a45ff5e940e639979a3d1792adb6"
+                "sha256:6f590d76b713d5de4e49fe4fbca24474469f53c83632d5d0fd056f7ff7e8112b",
+                "sha256:ac4008d396bc9cd983ea483cb7139c0240a07bbc74ffb6232fceffedc6cf03a8"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==66.0.0"
+            "version": "==66.1.1"
         },
         "sniffio": {
             "hashes": [
