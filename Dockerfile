@@ -20,6 +20,7 @@ COPY ./Pipfile ./Pipfile.lock /app/
 RUN pipenv install --deploy --ignore-pipfile --system --clear
 
 COPY ./app /app/app/
+COPY ./templates /app/templates/
 
 USER python
 
