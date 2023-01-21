@@ -121,6 +121,7 @@ async def login_user(
         secure=True,
         httponly=True,
         max_age=config.jwt.expiration,
+        samesite="None",
     )
 
     return UserResponse.from_mongo(user)
@@ -136,6 +137,7 @@ async def logout_user(response: Response):
         secure=True,
         httponly=True,
         expires=datetime.now(),
+        samesite="None",
     )
 
 
