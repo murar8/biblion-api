@@ -27,7 +27,9 @@ locals {
     "JWT_ISSUER"                      = var.jwt_issuer
     "JWT_EXPIRATION"                  = var.jwt_expiration
     "EMAIL_SENDER"                    = var.email_sender
-    "EMAIL_SMTP_SERVER"               = var.email_smtp_server
+    "EMAIL_SMTP_HOST"                 = var.email_smtp_host
+    "EMAIL_SMTP_PORT"                 = var.email_smtp_port
+    "EMAIL_SMTP_TLS"                  = true
     "EMAIL_SMTP_USERNAME"             = var.email_smtp_username
     "EMAIL_VERIFICATION_EXPIRATION"   = var.email_verification_expiration
     "EMAIL_PASSWORD_RESET_EXPIRATION" = var.email_password_reset_expiration

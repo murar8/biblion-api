@@ -23,7 +23,9 @@ class DatabaseConfig(pydantic.BaseSettings):
 
 class EmailConfig(pydantic.BaseSettings):
     sender: EmailStr
-    smtp_server: str
+    smtp_host: str
+    smtp_port: conint(gt=0, lt=2**16)
+    smtp_tls: bool
     smtp_username: str
     smtp_password: str
     verification_expiration: conint(gt=0)

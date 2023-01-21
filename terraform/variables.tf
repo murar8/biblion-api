@@ -52,8 +52,17 @@ variable "email_sender" {
   type = string
 }
 
-variable "email_smtp_server" {
+variable "email_smtp_host" {
   type = string
+}
+
+variable "email_smtp_port" {
+  type = string
+}
+
+variable "email_smtp_tls" {
+  type    = bool
+  default = true
 }
 
 variable "email_smtp_username" {

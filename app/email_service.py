@@ -17,7 +17,11 @@ class SendEmailArgs(TypedDict):
 class EmailService:
     def __init__(self, config: EmailConfig) -> None:
         self.config = config
-        self.smtp = smtplib.SMTP(config.smtp_server)
+        self.smtp = smtplib.SMTP(host=config.smtp_host, port=config.smtp_port)
+
+        if config.smtp_tls:
+            self.smtp.starttls()
+
         self.environment = Environment(loader=FileSystemLoader("templates/"))
         self.smtp.login(config.smtp_username, config.smtp_password)
 
