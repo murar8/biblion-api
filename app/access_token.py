@@ -20,7 +20,7 @@ class AccessToken(BaseModel):
 
     @staticmethod
     def encode(sub: uuid.UUID, config: JwtConfig) -> str:
-        iat = time.time()
+        iat = time.time() - 1  # Make sure the token is available immediately
         exp = iat + config.expiration
 
         return jwt.encode(
