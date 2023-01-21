@@ -5,16 +5,16 @@
 
 resource "google_service_account" "github_service_account" {
   depends_on = [google_project_service.project_services]
-  account_id = "github-service-account"
+  account_id = "gh-service-account"
 }
 
 resource "google_iam_workload_identity_pool" "github_identity_pool" {
   depends_on                = [google_project_service.project_services]
-  workload_identity_pool_id = "github-identity-pool"
+  workload_identity_pool_id = "gh-identity-pool"
 }
 
 resource "google_iam_workload_identity_pool_provider" "github_oidc_provider" {
-  workload_identity_pool_provider_id = "github-oidc-provider"
+  workload_identity_pool_provider_id = "gh-oidc-provider"
   workload_identity_pool_id          = google_iam_workload_identity_pool.github_identity_pool.workload_identity_pool_id
 
   attribute_mapping = {
