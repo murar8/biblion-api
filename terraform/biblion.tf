@@ -1,7 +1,7 @@
-resource "google_artifact_registry_repository" "biblion_repository" {
+resource "google_artifact_registry_repository" "biblion_repo" {
   depends_on    = [google_project_service.project_services]
   location      = var.gcloud_region
-  repository_id = "biblion-repository"
+  repository_id = "biblion-repo"
   format        = "DOCKER"
 }
 
