@@ -11,7 +11,7 @@ output "gcloud_registry" {
 }
 
 output "gcloud_repository" {
-  value = "${var.gcloud_region}-docker.pkg.dev/${var.gcloud_project}/${google_artifact_registry_repository.biblion_repo.name}"
+  value = "${var.gcloud_region}-docker.pkg.dev/${var.gcloud_project}/${google_artifact_registry_repository.biblion_repository.name}"
 }
 
 output "gcloud_service" {
