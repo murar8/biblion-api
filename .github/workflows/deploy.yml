@@ -87,6 +87,7 @@ jobs:
       - name: Build and Push
         uses: "docker/build-push-action@v3"
         with:
+          provenance: false
           push: true
           context: "."
           build-args: "VERSION=${{ github.sha }}"
