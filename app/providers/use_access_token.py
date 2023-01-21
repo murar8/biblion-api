@@ -11,6 +11,11 @@ def use_access_token(
     config: Config = Depends(use_config),
     access_token: str | None = Cookie(default=None),
 ):
+    """
+    NOTE: This function will return a valid access token even when the token has been
+    invalidated after a password update, prefer using `use_logged_user` instead.
+    """
+
     if access_token is None:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="No JWT found.")
 

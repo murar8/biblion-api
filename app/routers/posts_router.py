@@ -5,7 +5,6 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException
 from pymongo.errors import DuplicateKeyError
 
-from app.access_token import AccessToken
 from app.models.documents import PostDocument, UserDocument
 from app.models.requests import CreatePostRequest, GetPostsParams
 from app.models.responses import (
@@ -14,7 +13,6 @@ from app.models.responses import (
     PaginatedResponse,
     PostResponse,
 )
-from app.providers.use_access_token import use_access_token
 from app.providers.use_logged_user import use_logged_user
 from app.util.shortid import generate_shortid
 
@@ -95,14 +93,14 @@ async def create_post(
 async def update_post(
     post_id: str,
     body: CreatePostRequest,
-    jwt: AccessToken = Depends(use_access_token),
+    user: UserDocument = Depends(use_logged_user),
 ):
     post = await PostDocument.get(post_id)
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
 
-    if post.creator.ref.id != jwt.sub:
+    if post.creator.ref.id != user.id:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail="Current user is not the owner of the post.",
@@ -121,14 +119,14 @@ async def update_post(
 @posts_router.delete("/{post_id}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_post(
     post_id: str,
-    jwt: AccessToken = Depends(use_access_token),
+    user: UserDocument = Depends(use_logged_user),
 ):
     post = await PostDocument.get(post_id)
 
     if not post:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Post not found.")
 
-    if post.creator.ref.id != jwt.sub:
+    if post.creator.ref.id != user.id:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail="Current user is not the owner of the post.",
