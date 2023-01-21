@@ -79,7 +79,7 @@ jobs:
         id: "docker-metadata"
         uses: "docker/metadata-action@v4"
         with:
-          images: "${{ needs.deploy_infrastructure.outputs.gcloud_repository }}/biblion-api"
+          images: "${{ needs.deploy_infrastructure.outputs.gcloud_repository }}/biblion"
           tags: |
             type=ref,event=branch
             type=sha,format=long
