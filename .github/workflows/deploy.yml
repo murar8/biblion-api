@@ -89,11 +89,11 @@ jobs:
         with:
           push: true
           context: "."
-          build-args: "VERSION=${{ steps.docker-metadata.outputs.tags[0] }}"
+          build-args: "VERSION=${{ github.sha }}"
           labels: "${{ steps.docker-metadata.outputs.labels }}"
           tags: "${{ steps.docker-metadata.outputs.tags }}"
-          # cache-from: type=gha,scope=${{ github.ref }}-${{ github.workflow }}-${{ github.job }}
-          # cache-to: type=gha,scope=${{ github.ref }}-${{ github.workflow }}-${{ github.job }},mode=max
+          cache-from: type=gha,scope=${{ github.ref }}-${{ github.workflow }}-${{ github.job }}
+          cache-to: type=gha,scope=${{ github.ref }}-${{ github.workflow }}-${{ github.job }},mode=max
 
       - name: Deploy to Cloud Run
         uses: "google-github-actions/deploy-cloudrun@v1"
