@@ -1,10 +1,10 @@
 FROM python:3.11
 
-RUN adduser --system python
+RUN groupadd --gid 1000 nonroot && useradd --uid 1000 --gid 1000 -m nonroot
 
 RUN pip install --no-cache --upgrade pip && pip install --no-cache pipenv
 
-USER python
+USER nonroot
 
 WORKDIR /app
 
