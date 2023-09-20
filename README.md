@@ -6,11 +6,11 @@
 
 This project contains the backend functionality for the biblion project, a simple pastebin-like file upload service.
 
-The OpenAPI spec is available at https://biblion-service-ta6whx52wq-ey.a.run.app/openapi.json
+The OpenAPI spec is available at https://biblion-service-niff5rcvpq-ey.a.run.app/openapi.json
 
-Swagger documentation for the API is available at https://biblion-service-ta6whx52wq-ey.a.run.app/docs
+Swagger documentation for the API is available at https://biblion-service-niff5rcvpq-ey.a.run.app/docs
 
-The frontend repository is hosted at [https://github.com/murar8/biblion-web]()
+The frontend repository is hosted at https://github.com/murar8/biblion-web
 
 ## Tech stack
 
